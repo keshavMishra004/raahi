@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #fff;
+  color: #222;
+}
+
+.header {
+  background: #F77F2A;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  height: 70px;
+  justify-content: space-between;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.header-logo img {
+  height: 40px;
+  margin-right: 12px;
+}
+
+.header-nav {
+  display: flex;
+  gap: 32px;
+  font-size: 1.25rem;
+}
+
+.header-icons {
+  display: flex;
+  gap: 24px;
+  font-size: 1.5rem;
+}
+
+.hero {
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
+  color: #fff;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  margin-top: 80px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 36px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.hero-btn {
+  background: #1CA7EC;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 18px 36px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: background 0.2s;
+}
+
+.hero-btn:hover {
+  background: #1482b8;
+} */
