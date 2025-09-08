@@ -9,7 +9,7 @@ export default function ScrollSpyNav() {
   const [dragging, setDragging] = useState(false);
   const trackRef = useRef(null);
 
-  // Sync plane with scroll
+  // Syncing plane with scroll
   useEffect(() => {
     const handleScroll = () => {
       if (dragging) return;
@@ -70,7 +70,7 @@ export default function ScrollSpyNav() {
     <div className="fixed right-6 top-1/2 -translate-y-1/2 z-50">
       <div
         ref={trackRef}
-        className="relative flex flex-col items-center justify-between bg-teal-900 rounded-full py-6 h-[300px] w-10"
+        className="relative flex flex-col items-center justify-between bg-teal-900 rounded-full py-10 h-[320px] w-10"
       >
         {/* Dots */}
         <div className="absolute inset-0 flex flex-col justify-between items-center py-6">
