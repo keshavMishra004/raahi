@@ -1,4 +1,3 @@
-
 import { Moon, Heart, User } from "lucide-react";
 import { Poppins } from "next/font/google";
 import ScrollSpyNav from "./scrollSpyNav";
