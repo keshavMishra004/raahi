@@ -1,8 +1,11 @@
+
 import { Moon, Heart, User } from "lucide-react";
 import { Poppins } from "next/font/google";
 import ScrollSpyNav from "./scrollSpyNav";
-import Testimonials from "./Component/Testimonials";
-import WhyChooseUs from "./Component/WhyChooseUs.js";
+import Testimonials from "./Component/Testimonial/Testimonials";
+import Services from "./Component/Services/Services";
+import WhyChooseUs from "./Component/WhyChooseUs";
+
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -77,19 +80,21 @@ export default function Home() {
       </section>
 
       {/* Charters Section */}
-      <section
+      <Services/>
+      {/* <section
         id="charters"
         className="h-screen flex items-center justify-center bg-gray-100"
       >
         <h2 className="text-4xl font-bold text-gray-800">Charters</h2>
       </section>
-
-      {/* Why Choose Us Section */}
-      <WhyChooseUs />
       
       <Testimonials/>
 
       {/* Aerial Services Section */}
+
+      <WhyChooseUs/>
+
+      <Testimonials/>
       <section
         id="aerial"
         className="h-screen flex items-center justify-center bg-white"
@@ -110,3 +115,5 @@ export default function Home() {
     </div>
   );
 }
+
+
