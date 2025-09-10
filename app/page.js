@@ -5,7 +5,7 @@ import ScrollSpyNav from "./scrollSpyNav";
 import Testimonials from "./Component/Testimonial/Testimonials";
 import Services from "./Component/Services/Services";
 import WhyChooseUs from "./Component/WhyChooseUs";
-
+import FeaturedServices from "./Component/FeaturedServices.js";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -93,6 +93,8 @@ export default function Home() {
       {/* Aerial Services Section */}
 
       <WhyChooseUs/>
+
+      <FeaturedServices />
 
       <Testimonials/>
       <section
