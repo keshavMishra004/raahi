@@ -4,6 +4,9 @@ import { Poppins } from "next/font/google";
 import ScrollSpyNav from "./scrollSpyNav";
 import Testimonials from "./Component/Testimonial/Testimonials";
 import Services from "./Component/Services/Services";
+import WhyChooseUs from "./Component/WhyChooseUs";
+
+
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
@@ -83,12 +86,15 @@ export default function Home() {
         className="h-screen flex items-center justify-center bg-gray-100"
       >
         <h2 className="text-4xl font-bold text-gray-800">Charters</h2>
-        
-      </section> */}
+      </section>
       
       <Testimonials/>
 
       {/* Aerial Services Section */}
+
+      <WhyChooseUs/>
+
+      <Testimonials/>
       <section
         id="aerial"
         className="h-screen flex items-center justify-center bg-white"
