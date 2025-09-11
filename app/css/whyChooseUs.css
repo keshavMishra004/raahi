@@ -1,5 +1,5 @@
 .why-choose-us {
-    padding: 5em 8em;
+    padding: 8em 8em;
     text-align: start;
     background: #FDE8DB;
     font-family: 'Segoe UI', 'Arial', sans-serif;
@@ -79,4 +79,16 @@
 .why-choose-us svg {
     width: 80px;
     height: 80px;
+}
+
+.why-choose-us-anim-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.animated-feature-card {
+  /* Framer handles transform/opacity, but you can add extra styles here if needed */
+  will-change: transform, opacity;
 }
