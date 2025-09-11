@@ -19,6 +19,7 @@ section.footer {
   display: flex;
   flex-direction: column;
   gap: 0;
+  margin-left: 4em;
 }
 .footer-logo {
   display: flex;
@@ -41,14 +42,14 @@ section.footer {
   font-size: 2.3rem;
   font-weight: 100;
   color: #fff;
-  font-family: serif;
+  font-family: Inika;
 }
 .footer-tagline {
   font-style: italic;
   font-size: 1rem;
   color: #b6e0ea;
   margin-left: 68px;
-  margin-top: 2px;
+  font-family: Inter;
 }
 
 .footer-row-2 {
@@ -70,6 +71,7 @@ section.footer {
   color: #fff;
   font-size: 0.9rem;
   font-weight: 500;
+  font-family: Inter;
   margin-bottom: 6px;
   letter-spacing: 0.5px;
 }
@@ -83,6 +85,7 @@ section.footer {
   color: #6ec1d6;
   font-size: 0.9rem;
   font-weight: 400;
+  font-family: Inter;
   letter-spacing: 0.1px;
 }
 .footer-col ul li a {
@@ -126,6 +129,10 @@ section.footer {
   color: #fff;
   background: #06293a;
   font-size: 1.08rem;
+  font-family: Inika;
+  font-size: 16px;
+font-style: normal;
+font-weight: 400;
   padding: 16px 0 8px 0;
   letter-spacing: 0.2px;
 }

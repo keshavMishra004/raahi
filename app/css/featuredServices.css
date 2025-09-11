@@ -4,10 +4,10 @@
 }
 
 .featured-services h2 {
-    color: #174A6A;
-    font-size: 1.9rem;
+    color: #054972;
+    font-size: 32px;
     font-weight: 600;
-    letter-spacing: 1px;
+    font-family: Inter;
     margin: 1em 8rem;
 }
 
@@ -31,8 +31,9 @@
     width: 290px;
     font-size: 1.15rem;
     font-weight: 500;
+    font-family: Inter;
     color: #fff;
-    background: #0a2b4b;
+    background: #054972;
     border: none;
     outline: none;
     margin: 0.3em 0;
@@ -45,7 +46,8 @@
 }
 
 .featured-option.active {
-  background: #f05f2b;
+  background: #FF7125;
+  backdrop-filter: blur(2px);
   color: #fff;
   box-shadow: 0 4px 24px rgba(240, 95, 43, 0.18);
 }
