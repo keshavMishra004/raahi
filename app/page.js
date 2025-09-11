@@ -6,6 +6,7 @@ import Services from "./Component/Services/Services";
 import WhyChooseUs from "./Component/WhyChooseUs";
 import FeaturedServices from "./Component/FeaturedServices.js";
 import Footer from "./Component/Footer.js";
+import NeedAHelp from "./Component/NeedAHelp.js";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -111,6 +112,8 @@ export default function Home() {
       >
         <h2 className="text-4xl font-bold text-gray-800">Pilgrimage Flights</h2>
       </section>
+
+      <NeedAHelp />
 
       <Footer />
 

@@ -1,0 +1,120 @@
+.need-a-help {
+    display: flex;
+padding: 4em 8em;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+gap: 10px;
+align-self: stretch;
+background: #FCEADE;
+}
+
+.help-container {
+    display: flex;
+/* width: 1156px; */
+flex-direction: column;
+justify-content: center;
+align-items: center;
+gap: 2em;
+}
+
+.help-head {
+    display: flex;
+flex-direction: column;
+align-items: center;
+gap: 16px;
+align-self: stretch;
+}
+
+.help-form {
+    display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+gap: 16px;
+align-self: stretch;
+}
+
+.need-a-help h3 {
+    color: #032B43;
+font-family: Inter;
+font-size: 36px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+align-self: stretch;
+}
+
+.need-a-help p {
+    color: #032B43;
+font-family: "Instrument Sans";
+font-size: 22px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+align-self: stretch;
+}
+
+.need-a-help input, .need-a-help select, .need-a-help textarea {
+    display: flex;
+width: 310px;
+height: 42px;
+padding: 0 16px;
+justify-content: center;
+align-items: center;
+border-radius: 10px;
+background: #FFF;
+}
+
+.need-a-help select {
+    width: 16em;
+    color: #2DA0A2;
+}
+
+.need-a-help textarea {
+    height: 7.5em;
+width: 27em;
+resize: none;
+}
+
+.agree-contact {
+    display: flex;
+    flex-direction: row;
+    margin-left: 1em;
+    gap: 1em;
+    color: #2DA0A2;
+    font-family: "Instagram Sans";
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+}
+
+.agree-contact input {
+    width: 1.5em;
+    height: 1.5em;
+    border: none;
+}
+
+.help-form button {
+    color: white;
+    background: #054972;
+    border-radius: 10px;
+    padding: 16px 24px;
+    margin-left: 1em;
+    transition: background 0.25s cubic-bezier(.4,0,.2,1), color 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+.help-form button:hover, .help-form button:focus {
+  background: #FF7125F0;
+  color: #fff;
+}
+
+p.help-ending {
+    margin-top: 8;
+    color: #2DA0A2;
+font-family: "Instagram Sans";
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+}
