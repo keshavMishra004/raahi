@@ -1,0 +1,40 @@
+.book-a-flight {
+    background: url('/bookAFlight.png') lightgray 50% / cover no-repeat;
+    height: 90vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.book-heading {
+    color: #FFF;
+text-align: center;
+text-shadow: 0 4px 8.4px rgba(0, 0, 0, 0.25);
+font-family: Inter;
+font-size: 64px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+}
+
+.book-button {
+    color: white;
+    background: #054972;
+    border-radius: 10px;
+    padding: 16px 24px;
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 500;
+    transition: background 0.25s cubic-bezier(.4,0,.2,1), color 0.25s cubic-bezier(.4,0,.2,1), transform 0.12s cubic-bezier(.4,0,.2,1);
+}
+
+.book-button:hover {
+  background: #FF7125F0;
+  color: #fff;
+}
+
+.book-button:active {
+  transform: scale(0.9);
+}

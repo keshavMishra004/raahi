@@ -104,9 +104,13 @@ font-weight: 400;
     transition: background 0.25s cubic-bezier(.4,0,.2,1), color 0.25s cubic-bezier(.4,0,.2,1);
 }
 
-.help-form button:hover, .help-form button:focus {
+.help-form button:hover {
   background: #FF7125F0;
   color: #fff;
+}
+
+.help-form button:active {
+  transform: scale(0.9);
 }
 
 p.help-ending {
