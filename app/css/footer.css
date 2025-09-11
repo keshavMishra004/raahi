@@ -19,6 +19,7 @@ section.footer {
   display: flex;
   flex-direction: column;
   gap: 0;
+  margin-left: 4em;
 }
 .footer-logo {
   display: flex;
