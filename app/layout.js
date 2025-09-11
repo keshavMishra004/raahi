@@ -1,6 +1,5 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inika, Inter, Instrument_Sans } from "next/font/google";
 import "./globals.css";
-import Head from "next/head";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,6 +11,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const inika = Inika({
+  variable: "--font-inika",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
+  subsets: ["latin"],
+});
+
+// Gilroy-Medium is not available on Google Fonts. To use it, self-host the font and add an @font-face rule in your CSS.
+
 export const metadata = {
   title: "RAAHi - Fly Bharat",
   description: "Charters, aerial services, and pilgrimage flights across India.",
@@ -20,7 +37,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <Head>
+      <head>
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
@@ -28,8 +45,9 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
-      </Head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* Add @font-face for Gilroy-Medium in your CSS if you have the font file */}
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${inika.variable} ${inter.variable} ${instrumentSans.variable} antialiased`}>
         {children}
       </body>
     </html>
