@@ -8,6 +8,7 @@ import FeaturedServices from "./Component/FeaturedServices.js";
 import Footer from "./Component/Footer.js";
 import NeedAHelp from "./Component/NeedAHelp.js";
 import BookAFlight from "./Component/BookAFlight.js";
+import DiscoverYourDestinations from "./Component/DiscoverYourDestinations.js";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -97,6 +98,8 @@ export default function Home() {
       <WhyChooseUs/>
 
       <FeaturedServices />
+
+      <DiscoverYourDestinations />
 
       <Testimonials/>
       <section
