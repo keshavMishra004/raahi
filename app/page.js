@@ -1,11 +1,14 @@
-
-
 import { Moon, Heart, User } from "lucide-react";
 import { Poppins } from "next/font/google";
 import ScrollSpyNav from "./scrollSpyNav";
 import Testimonials from "./Component/Testimonial/Testimonials";
 import Services from "./Component/Services/Services";
 import WhyChooseUs from "./Component/WhyChooseUs";
+import FeaturedServices from "./Component/FeaturedServices.js";
+import Footer from "./Component/Footer.js";
+import NeedAHelp from "./Component/NeedAHelp.js";
+import BookAFlight from "./Component/BookAFlight.js";
+
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -104,7 +107,11 @@ export default function Home() {
       {/* Testimonials */}
       <Testimonials />
 
-      {/* Aerial Services Section */}
+
+      <FeaturedServices />
+
+      <Testimonials/>
+
       <section
         id="aerial"
         className="h-screen flex items-center justify-center bg-white"
@@ -119,6 +126,12 @@ export default function Home() {
       >
         <h2 className="text-4xl font-bold text-gray-800">Pilgrimage Flights</h2>
       </section>
+
+      <BookAFlight />
+
+      <NeedAHelp />
+
+      <Footer />
 
       {/* Right-side scroll navigation */}
       <ScrollSpyNav />

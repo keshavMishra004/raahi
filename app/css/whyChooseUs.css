@@ -1,5 +1,5 @@
 .why-choose-us {
-    padding: 5em 8em;
+    padding: 8em 8em 10em 8em;
     text-align: start;
     background: #FDE8DB;
     font-family: 'Segoe UI', 'Arial', sans-serif;
@@ -7,17 +7,19 @@
 
 .why-choose-us h2 {
 	color: #174A6A;
-	font-size: 1.7rem;
-	font-weight: 700;
+	font-size: 32px;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 600;
 	margin-bottom: 12px;
-	letter-spacing: 1px;
 }
 
 .why-choose-us .subtitle {
 	color: #2176AE;
-	font-size: 1.2rem;
+	font-size: 22px;
+    font-family: Instrument Sans;
 	margin-bottom: 40px;
-	font-weight: 500;
+	font-weight: 400;
 }
 
 .features {
@@ -30,7 +32,7 @@
 .feature-card {
     background: #002B3A;
     border-radius: 24px;
-    padding: 1em;
+    padding: 1em 0;
     width: 11.5em;
     display: flex;
     flex-direction: column;
@@ -50,13 +52,14 @@
 }
 
 .feature-card:hover .feature-icon svg {
-    stroke: #00fff7;
-    filter: drop-shadow(0 0 8px #00fff7aa);
+    stroke: #3EFCFF;
+    stroke-width: 2;
+    filter: drop-shadow(0 0 8px #3EFCFFaa);
     transition: stroke 0.3s, filter 0.3s;
 }
 
 .feature-card:hover .feature-title {
-    color: #00fff7;
+    color: #3EFCFF;
     transition: color 0.3s;
 }
 
@@ -65,15 +68,27 @@
 	box-shadow: 0 8px 24px rgba(23, 74, 106, 0.16);
 }
 
-.feature-icon {
-	margin-bottom: 18px;
-}
-
 .feature-title {
 	color: #fff;
-	font-size: 1.15rem;
-	font-weight: 500;
-	margin-top: 8px;
-	letter-spacing: 0.5px;
+	font-size: 1.1rem;
+	font-weight: 400;
+    font-family: Instrument Sans;
 	text-align: center;
+}
+
+.why-choose-us svg {
+    width: 80px;
+    height: 80px;
+}
+
+.why-choose-us-anim-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.animated-feature-card {
+  /* Framer handles transform/opacity, but you can add extra styles here if needed */
+  will-change: transform, opacity;
 }

@@ -1,6 +1,7 @@
-import React from 'react'
+"use client";
+import React, { useRef } from 'react'
 import '../css/whyChooseUs.css'
-import WhyChooseUsClient from './WhyChooseUsClient'
+import { motion, useInView } from 'framer-motion'
 
 const features = [
   {
@@ -78,26 +79,61 @@ const features = [
   },
 ];
 
-function WhyChooseUs() {
+const containerVariants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.28,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 150 },
+    show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      opacity: { duration: 0.5, ease: 'easeIn' },
+      y: { duration: 0.3, ease: 'easeOut' }
+    }
+  },
+};
+
+const hoverMotion = {
+  scale: 1.05,
+  y: -12,
+  transition: { duration: 0.05, ease: [0.4, 0, 0.2, 1] },
+};
+
+function WhyChooseUsClient() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-100px' });
+
   return (
-    <>
-      <noscript>
-        <section className="why-choose-us">
-          <h2>WHY CHOOSE US?</h2>
-          <p className="subtitle">Delivering trust, comfort, and reliability — because your journey deserves nothing less.</p>
-          <div className="features">
-            {features.map((feature) => (
-              <div className="feature-card" key={feature.title}>
-                <div className="feature-icon">{feature.icon}</div>
-                <div className="feature-title">{feature.title}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </noscript>
-      <WhyChooseUsClient />
-    </>
+    <section className="why-choose-us" ref={ref}>
+      <h2>WHY CHOOSE US?</h2>
+      <p className="subtitle">Delivering trust, comfort, and reliability — because your journey deserves nothing less.</p>
+      <motion.div
+        className="features"
+        variants={containerVariants}
+        initial="hidden"
+        animate={isInView ? "show" : "hidden"}
+      >
+        {features.map((feature, idx) => (
+          <motion.div
+            className="feature-card animated-feature-card"
+            key={feature.title}
+            variants={cardVariants}
+            whileHover={hoverMotion}
+          >
+            <div className="feature-icon">{feature.icon}</div>
+            <div className="feature-title">{feature.title}</div>
+          </motion.div>
+        ))}
+      </motion.div>
+    </section>
   )
 }
 
-export default WhyChooseUs
+export default WhyChooseUsClient
