@@ -264,7 +264,47 @@ function DiscoverYourDestinations() {
 
   return (
     <section className="discover-your-dest">
-      <h2 className="section-title hero">DISCOVER YOUR DESTINATION</h2>
+      <h3 className="section-title hero">DISCOVER YOUR DESTINATION</h3>
+      <div className='dest-card'>
+        <div className='locations-div'>
+          <h4 className='locations-head'>Locations:</h4>
+          {/* services cards dynamically fetched */}
+          <div className='service-card'>
+            <h5 className='service-title'>SKY HIGH - NANRAUL</h5>
+            <p>⭐⭐⭐⭐⭐ 4.9</p>
+            <p className='service-location'>Narnaul, Pune</p>
+          </div>
+          <div className='service-card'>
+            <h5 className='service-title'>SKY HIGH - NANRAUL</h5>
+            <p>⭐⭐⭐ 3.2</p>
+            <p className='service-location'>Narnaul, Pune</p>
+          </div>
+        </div>
+        <div className='map-div'>
+          
+        </div>
+        <div className='options-div'>
+          <div className='select-options'>
+            <select className="map-options" value={selectedState} onChange={handleStateChange}>
+              <option value="">Select a State</option>
+              {allStates.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <select
+              className="map-options"
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              disabled={!selectedState}
+            >
+              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+          </div>
+          <div className='zoom-options'>
+            <button type="button" className="zoom-btn" onClick={zoomIn}>+</button>
+            <button type="button" className="zoom-btn" onClick={zoomOut}>−</button>
+          </div>
+        </div>
+      </div>
+
 
       <div className="discover-card">
         <div className="discover-grid">
