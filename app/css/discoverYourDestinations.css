@@ -1,19 +1,13 @@
 .discover-your-dest {
-  padding: 40px 24px;
-  background: #fafafa;
+  padding: 56px 24px;
+  background: #22b8b6; /* teal background to match screenshot */
 }
 
 .discover-grid {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 420px 1fr; /* wider left as per design */
   gap: 24px;
   align-items: stretch;
-}
-
-@media (max-width: 1024px) {
-  .discover-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .left-panel {
@@ -22,22 +16,24 @@
   gap: 12px;
 }
 
+.left-panel--with-divider {
+  border-right: 1px solid #e5e7eb;
+  padding-right: 20px;
+}
+
 .section-title {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
+  margin: 0 0 16px;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #0f2d3a; /* deep teal/blue */
 }
 
 .controls {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-}
-
-@media (max-width: 640px) {
-  .controls {
-    grid-template-columns: 1fr;
-  }
 }
 
 .control .label {
@@ -55,12 +51,17 @@
   background: #fff;
 }
 
+.select--pill {
+  border-radius: 9999px;
+  box-shadow: 0 2px 10px rgba(2, 24, 33, 0.08);
+}
+
 .panel {
   margin-top: 8px;
   padding: 12px;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  background: #fff;
+  background: #fffdfc;
 }
 
 .locations {
@@ -78,6 +79,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+  color: #1f6f7a;
 }
 
 .state-chip {
@@ -125,7 +127,8 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   overflow: hidden;
-  min-height: 520px;
+  padding-left: 20px;
+  min-height: 560px; /* taller map as per design */
   background: #fff;
 }
 
@@ -158,3 +161,39 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Map overlay controls (top-right) */
+.map-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  gap: 10px;
+  width: min(280px, 42vw);
+}
+
+/* Zoom controls (bottom-right) */
+.zoom-controls {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 12px;
+}
+.zoom-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 10px rgba(2, 24, 33, 0.12);
+  cursor: pointer;
+}
+
+/* Minor polish */
+.panel { background: #fffdfc; }
+

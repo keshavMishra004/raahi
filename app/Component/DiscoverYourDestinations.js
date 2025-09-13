@@ -8,6 +8,7 @@ function DiscoverYourDestinations() {
 
   const [svgLoaded, setSvgLoaded] = useState(false)
   const [defaultViewBox, setDefaultViewBox] = useState(null)
+  const defaultVBRef = useRef(null)
 
   const [allStates, setAllStates] = useState([])
   const [selectedState, setSelectedState] = useState('')
@@ -66,7 +67,9 @@ function DiscoverYourDestinations() {
           const svg = containerRef.current.querySelector('svg')
           if (svg) {
             svgRef.current = svg
-            setDefaultViewBox(svg.getAttribute('viewBox'))
+            const vb = svg.getAttribute('viewBox')
+            setDefaultViewBox(vb)
+            defaultVBRef.current = parseViewBoxStr(vb)
             wireUpSVG(svg)
             setSvgLoaded(true)
           }
@@ -153,6 +156,55 @@ function DiscoverYourDestinations() {
     }
   }
 
+  // Zoom helpers
+  function parseViewBoxStr(str) {
+    if (!str) return null
+    const [x, y, w, h] = str.split(/\s+|,/).map(Number)
+    return { x, y, w, h }
+  }
+  function getCurrentVB() {
+    const svg = svgRef.current
+    if (!svg) return null
+    return parseViewBoxStr(svg.getAttribute('viewBox'))
+  }
+  function setVB({ x, y, w, h }) {
+    const svg = svgRef.current
+    if (!svg) return
+    svg.setAttribute('viewBox', `${x} ${y} ${w} ${h}`)
+  }
+  function clampToDefault(vb) {
+    const def = defaultVBRef.current
+    if (!def) return vb
+    const w = Math.min(vb.w, def.w)
+    const h = Math.min(vb.h, def.h)
+    const xMin = def.x
+    const yMin = def.y
+    const xMax = def.x + def.w - w
+    const yMax = def.y + def.h - h
+    return {
+      w, h,
+      x: Math.min(Math.max(vb.x, xMin), xMax),
+      y: Math.min(Math.max(vb.y, yMin), yMax),
+    }
+  }
+  function zoomBy(factor) {
+    const vb = getCurrentVB()
+    if (!vb) return
+    const cx = vb.x + vb.w / 2
+    const cy = vb.y + vb.h / 2
+    const newW = vb.w * factor
+    const newH = vb.h * factor
+    const next = clampToDefault({
+      x: cx - newW / 2,
+      y: cy - newH / 2,
+      w: newW,
+      h: newH,
+    })
+    setVB(next)
+  }
+  function zoomIn() { zoomBy(0.8) }
+  function zoomOut() { zoomBy(1.25) }
+
   function zoomToPath(path) {
     const svg = svgRef.current
     if (!svg) return
@@ -162,7 +214,7 @@ function DiscoverYourDestinations() {
     const y = bbox.y - pad
     const w = bbox.width + pad * 2
     const h = bbox.height + pad * 2
-    svg.setAttribute('viewBox', `${x} ${y} ${w} ${h}`)
+    setVB(clampToDefault({ x, y, w, h }))
   }
 
   function resetZoom() {
@@ -212,77 +264,70 @@ function DiscoverYourDestinations() {
 
   return (
     <section className="discover-your-dest">
-      <div className="discover-grid">
-        <div className="left-panel">
-          <h2 className="section-title">Discover Your Destinations</h2>
+      <h2 className="section-title hero">DISCOVER YOUR DESTINATION</h2>
 
-          <div className="controls">
-            <div className="control">
-              <label className="label">State</label>
-              <select className="select" value={selectedState} onChange={handleStateChange}>
-                <option value="">Select a state</option>
-                {allStates.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-            <div className="control">
-              <label className="label">Service</label>
-              <select
-                className="select"
-                value={selectedCategory}
-                onChange={handleCategoryChange}
-                disabled={!selectedState}
-              >
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
+      <div className="discover-card">
+        <div className="discover-grid">
+          <div className="left-panel left-panel--with-divider">
+            <div className="panel locations">
+              <div className="locations-header">
+                <h3 className="locations-title">Locations:</h3>
+                {selectedState ? <span className="state-chip">{selectedState}</span> : null}
+              </div>
+
+              {!selectedState && (
+                <p className="muted">Select a state to view available services.</p>
+              )}
+
+              {selectedState && services.length === 0 && (
+                <p className="muted">No services found for this category. Try another filter.</p>
+              )}
+
+              {selectedState && services.length > 0 && (
+                <ul className="locations-list">
+                  {services.map((svc, idx) => (
+                    <li key={idx} className="location-item">
+                      <span className="location-name">{svc.name}</span>
+                      <span className="location-meta">
+                        {svc.category}{svc.location ? ` • ${svc.location}` : ''}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
-          <div className="panel locations">
-            <div className="locations-header">
-              <h3 className="locations-title">Locations</h3>
-              {selectedState ? <span className="state-chip">{selectedState}</span> : null}
+          <div className="map-panel">
+            {!svgLoaded && <div className="map-loading">Loading map...</div>}
+            <div ref={containerRef} className="map-container" />
+
+            {/* Top-right overlay controls */}
+            <div className="map-controls">
+              <div className="control">
+                <select className="select select--pill" value={selectedState} onChange={handleStateChange}>
+                  <option value="">Select a State</option>
+                  {allStates.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="control">
+                <select
+                  className="select select--pill"
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                  disabled={!selectedState}
+                >
+                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+              </div>
             </div>
 
-            {!selectedState && (
-              <p className="muted">Select a state to view available services.</p>
-            )}
-
-            {selectedState && services.length === 0 && (
-              <p className="muted">No services found for this category. Try another filter.</p>
-            )}
-
-            {selectedState && services.length > 0 && (
-              <ul className="locations-list">
-                {services.map((svc, idx) => (
-                  <li key={idx} className="location-item">
-                    <span className="location-name">{svc.name}</span>
-                    <span className="location-meta">
-                      {svc.category}{svc.location ? ` • ${svc.location}` : ''}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            {/* Bottom-right zoom controls */}
+            <div className="zoom-controls">
+              <button type="button" className="zoom-btn" onClick={zoomIn}>+</button>
+              <button type="button" className="zoom-btn" onClick={zoomOut}>−</button>
+            </div>
           </div>
-        </div>
-
-        <div className="map-panel">
-          {!svgLoaded && (
-            <div className="map-loading">Loading map...</div>
-          )}
-          <div ref={containerRef} className="map-container" />
-          <button
-            type="button"
-            className="reset-btn"
-            onClick={() => { setSelectedState(''); resetZoom(); highlightState(''); }}
-            disabled={!selectedState}
-          >
-            Reset
-          </button>
         </div>
       </div>
     </section>
