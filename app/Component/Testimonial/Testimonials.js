@@ -3,11 +3,11 @@ import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 
 const testimonials = [
-  { name: "Shivam Mishra", text: "Lorem ipsum dolor sit amet...", rating: 4.8 },
-  { name: "Gyanvi Mehta", text: "This service was excellent, satisfied!", rating: 4.4 },
+  { name: "Vikrant Shukla", text: "Lorem ipsum dolor sit amet...", rating: 4.8 },
+  { name: "Gyanvi Agarwal", text: "This service was excellent, satisfied!", rating: 4.4 },
   { name: "Priya Sharma", text: "Booking was super easy.", rating: 2.5 },
   { name: "Rahul Verma", text: "Affordable and convenient.jfjnferjkrj vrjev reknvjg vvtkjrg ktrbv   v jekvejr", rating: 5 },
-  { name: "Veronica Kumari", text: "They are very supportive and thier staff is supportive too.", rating: 5 },
+  { name: "MD Rayan", text: "They are very supportive and thier staff is supportive too.", rating: 5 },
 ];
 
 // Star Rating Component (Full + Half + Empty)
