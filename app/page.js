@@ -8,6 +8,7 @@ import FeaturedServices from "./Component/FeaturedServices.js";
 import Footer from "./Component/Footer.js";
 import NeedAHelp from "./Component/NeedAHelp.js";
 import BookAFlight from "./Component/BookAFlight.js";
+import DiscoverYourDestinations from "./Component/DiscoverYourDestinations.js";
 
 
 const poppins = Poppins({
@@ -109,6 +110,8 @@ export default function Home() {
 
 
       <FeaturedServices />
+
+      <DiscoverYourDestinations />
 
       <Testimonials/>
 
