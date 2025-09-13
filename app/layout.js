@@ -6,6 +6,9 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+<link rel="preload" href="/_next/static/css/app/page.css" />
+
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
