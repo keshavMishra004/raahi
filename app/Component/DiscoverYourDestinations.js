@@ -3,12 +3,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import "../css/discoverYourDestinations.css"
 
 function DiscoverYourDestinations() {
+  // Small map refs
   const containerRef = useRef(null)
   const svgRef = useRef(null)
 
   const [svgLoaded, setSvgLoaded] = useState(false)
-  const [defaultViewBox, setDefaultViewBox] = useState(null)
-  const defaultVBRef = useRef(null)
+
+  // Track default viewBox for the single SVG
+  const defaultVBStrRef = useRef(null) // string
+  const defaultVBRef = useRef(null)    // {x,y,w,h}
 
   const [allStates, setAllStates] = useState([])
   const [selectedState, setSelectedState] = useState('')
@@ -51,6 +54,7 @@ function DiscoverYourDestinations() {
       { name: 'Ganga Aarti Cruise', category: 'Charters', location: 'Varanasi' },
       { name: 'Wildlife Safari - Dudhwa', category: 'Wildlife' },
       { name: 'Agra Heritage Tour', category: 'Cultural', location: 'Agra' },
+      { name: 'Falana Falana Trek', category: 'Pilgrim', location: 'Prayagraj' }
     ],
     // ...add more states as needed
   }
@@ -62,13 +66,14 @@ function DiscoverYourDestinations() {
         const res = await fetch('/maps/in.svg', { cache: 'force-cache' })
         const text = await res.text()
         if (cancelled) return
+
         if (containerRef.current) {
           containerRef.current.innerHTML = text
           const svg = containerRef.current.querySelector('svg')
           if (svg) {
             svgRef.current = svg
             const vb = svg.getAttribute('viewBox')
-            setDefaultViewBox(vb)
+            defaultVBStrRef.current = vb
             defaultVBRef.current = parseViewBoxStr(vb)
             wireUpSVG(svg)
             setSvgLoaded(true)
@@ -127,6 +132,7 @@ function DiscoverYourDestinations() {
       p.addEventListener('mouseleave', () => p.removeAttribute('opacity'))
     })
 
+    // Populate dropdown
     setAllStates(Array.from(names).sort((a, b) => a.localeCompare(b)))
   }
 
@@ -143,20 +149,7 @@ function DiscoverYourDestinations() {
     return cleaned
   }
 
-  function onSelectState(stateName, pathEl) {
-    setSelectedState(stateName)
-    highlightState(stateName)
-    if (pathEl) {
-      zoomToPath(pathEl)
-    } else {
-      const svg = svgRef.current
-      if (!svg) return
-      const candidate = svg.querySelector(`path[data-name="${cssEscape(stateName)}"]`)
-      if (candidate) zoomToPath(candidate)
-    }
-  }
-
-  // Zoom helpers
+  // Single-map helpers
   function parseViewBoxStr(str) {
     if (!str) return null
     const [x, y, w, h] = str.split(/\s+|,/).map(Number)
@@ -219,8 +212,8 @@ function DiscoverYourDestinations() {
 
   function resetZoom() {
     const svg = svgRef.current
-    if (svg && defaultViewBox) {
-      svg.setAttribute('viewBox', defaultViewBox)
+    if (svg && defaultVBStrRef.current) {
+      svg.setAttribute('viewBox', defaultVBStrRef.current)
     }
   }
 
@@ -247,6 +240,19 @@ function DiscoverYourDestinations() {
     return value.replace(/["\\]/g, '\\$&')
   }
 
+  function onSelectState(stateName, pathEl) {
+    setSelectedState(stateName)
+    highlightState(stateName)
+    if (pathEl) {
+      zoomToPath(pathEl)
+    } else {
+      const svg = svgRef.current
+      if (!svg) return
+      const candidate = svg.querySelector(`path[data-name="${cssEscape(stateName)}"]`)
+      if (candidate) zoomToPath(candidate)
+    }
+  }
+
   function handleStateChange(e) {
     const stateName = e.target.value
     if (!stateName) {
@@ -265,24 +271,35 @@ function DiscoverYourDestinations() {
   return (
     <section className="discover-your-dest">
       <h3 className="section-title hero">DISCOVER YOUR DESTINATION</h3>
+
+      {/* Compact card with small map */}
       <div className='dest-card'>
         <div className='locations-div'>
           <h4 className='locations-head'>Locations:</h4>
-          {/* services cards dynamically fetched */}
-          <div className='service-card'>
-            <h5 className='service-title'>SKY HIGH - NANRAUL</h5>
-            <p>⭐⭐⭐⭐⭐ 4.9</p>
-            <p className='service-location'>Narnaul, Pune</p>
-          </div>
-          <div className='service-card'>
-            <h5 className='service-title'>SKY HIGH - NANRAUL</h5>
-            <p>⭐⭐⭐ 3.2</p>
-            <p className='service-location'>Narnaul, Pune</p>
-          </div>
+          {/* dynamically fetched list of services/locations */}
+          {selectedState && services.length > 0 && (
+            services.map((srv, i) => (
+              <div className="service-card" key={`${srv.name}-${i}`}>
+                <h5 className='service-title'>{srv.name}</h5>
+                <p>⭐⭐⭐ 3.2</p>
+                <p className='service-location'>{srv.location || selectedState}</p>
+              </div>
+            ))
+          )}
+          {!selectedState && (
+            <p className="muted">Select a state to view available services.</p>
+          )}
+          {selectedState && services.length === 0 && (
+            <p className="muted">No services found for this category.</p>
+          )}
         </div>
+
+        {/* Map */}
         <div className='map-div'>
-          
+          {!svgLoaded && <div className="map-loading">Loading map...</div>}
+          <div ref={containerRef} className="map-container" />
         </div>
+        {/* options for map and services */}
         <div className='options-div'>
           <div className='select-options'>
             <select className="map-options" value={selectedState} onChange={handleStateChange}>
@@ -301,72 +318,6 @@ function DiscoverYourDestinations() {
           <div className='zoom-options'>
             <button type="button" className="zoom-btn" onClick={zoomIn}>+</button>
             <button type="button" className="zoom-btn" onClick={zoomOut}>−</button>
-          </div>
-        </div>
-      </div>
-
-
-      <div className="discover-card">
-        <div className="discover-grid">
-          <div className="left-panel left-panel--with-divider">
-            <div className="panel locations">
-              <div className="locations-header">
-                <h3 className="locations-title">Locations:</h3>
-                {selectedState ? <span className="state-chip">{selectedState}</span> : null}
-              </div>
-
-              {!selectedState && (
-                <p className="muted">Select a state to view available services.</p>
-              )}
-
-              {selectedState && services.length === 0 && (
-                <p className="muted">No services found for this category. Try another filter.</p>
-              )}
-
-              {selectedState && services.length > 0 && (
-                <ul className="locations-list">
-                  {services.map((svc, idx) => (
-                    <li key={idx} className="location-item">
-                      <span className="location-name">{svc.name}</span>
-                      <span className="location-meta">
-                        {svc.category}{svc.location ? ` • ${svc.location}` : ''}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-
-          <div className="map-panel">
-            {!svgLoaded && <div className="map-loading">Loading map...</div>}
-            <div ref={containerRef} className="map-container" />
-
-            {/* Top-right overlay controls */}
-            <div className="map-controls">
-              <div className="control">
-                <select className="select select--pill" value={selectedState} onChange={handleStateChange}>
-                  <option value="">Select a State</option>
-                  {allStates.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="control">
-                <select
-                  className="select select--pill"
-                  value={selectedCategory}
-                  onChange={handleCategoryChange}
-                  disabled={!selectedState}
-                >
-                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-              </div>
-            </div>
-
-            {/* Bottom-right zoom controls */}
-            <div className="zoom-controls">
-              <button type="button" className="zoom-btn" onClick={zoomIn}>+</button>
-              <button type="button" className="zoom-btn" onClick={zoomOut}>−</button>
-            </div>
           </div>
         </div>
       </div>
