@@ -73,7 +73,7 @@ export default function Home() {
 
         <div className="relative z-10 px-4 mt-16">
           <div className="inline-block bg-teal-100 text-teal-900 px-4 py-1 mb-8 rounded-full text-sm font-medium shadow-md">
-            India's first comprehensive flight Discovery Platform
+            Indias first comprehensive flight Discovery Platform
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
@@ -98,7 +98,7 @@ export default function Home() {
       <section className="relative">
         <Services />
 
-        {/* 👇 Gradient fade to smooth transition */}
+        {/* Gradient fade to smooth transition */}
         <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-b from-[#032B41] to-[#FCEFE8] pointer-events-none" />
       </section>
 
@@ -111,24 +111,27 @@ export default function Home() {
 
       <FeaturedServices />
 
+      {/* <section
+=======
       <DiscoverYourDestinations />
 
       <Testimonials/>
 
       <section
+
         id="aerial"
         className="h-screen flex items-center justify-center bg-white"
       >
         <h2 className="text-4xl font-bold text-gray-800">Aerial Services</h2>
-      </section>
+      </section> */}
 
       {/* Pilgrimage Flights Section */}
-      <section
+      {/* <section
         id="pilgrimage"
         className="h-screen flex items-center justify-center bg-gray-200"
       >
         <h2 className="text-4xl font-bold text-gray-800">Pilgrimage Flights</h2>
-      </section>
+      </section> */}
 
       <BookAFlight />
 
