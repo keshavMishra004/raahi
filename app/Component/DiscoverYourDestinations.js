@@ -105,6 +105,35 @@ function DiscoverYourDestinations() {
     svg.style.height = '100%'
     svg.style.display = 'block'
 
+    // --- Inject gradient into <defs> if not present ---
+    let defs = svg.querySelector('defs')
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+      svg.insertBefore(defs, svg.firstChild)
+    }
+    // Remove any previous gradient with this id
+    const oldGrad = defs.querySelector('#paint0_linear_893_4441')
+    if (oldGrad) oldGrad.remove()
+    // Add the gradient
+    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
+    grad.setAttribute('id', 'paint0_linear_893_4441')
+    grad.setAttribute('x1', '0')
+    grad.setAttribute('y1', '0')
+    grad.setAttribute('x2', '0')
+    grad.setAttribute('y2', '1')
+    grad.setAttribute('gradientUnits', 'objectBoundingBox')
+    // Use objectBoundingBox for relative gradient on each path
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
+    stop1.setAttribute('offset', '0%')
+    stop1.setAttribute('stop-color', 'white')
+    grad.appendChild(stop1)
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
+    stop2.setAttribute('offset', '100%')
+    stop2.setAttribute('stop-color', '#DFFEFF')
+    grad.appendChild(stop2)
+    defs.appendChild(grad)
+
+    // Set all paths to use the gradient fill and default stroke
     const paths = Array.from(svg.querySelectorAll('path'))
     const names = new Set()
     paths.forEach(p => {
@@ -123,16 +152,18 @@ function DiscoverYourDestinations() {
       p.dataset.name = stateName
       names.add(stateName)
       p.style.cursor = 'pointer'
+      // Set default fill/stroke/stroke-width for each path
+      p.setAttribute('fill', 'url(#paint0_linear_893_4441)')
+      p.setAttribute('stroke', '#4A9BD4')
+      p.setAttribute('stroke-width', '2.5')
       if (!p.dataset.origFill) {
-        const origFill = p.getAttribute('fill') || ''
-        p.dataset.origFill = origFill
+        p.dataset.origFill = 'url(#paint0_linear_893_4441)'
       }
       p.addEventListener('click', () => onSelectState(stateName, p))
       p.addEventListener('mouseenter', () => p.setAttribute('opacity', '0.9'))
       p.addEventListener('mouseleave', () => p.removeAttribute('opacity'))
     })
 
-    // Populate dropdown
     setAllStates(Array.from(names).sort((a, b) => a.localeCompare(b)))
   }
 
@@ -198,6 +229,40 @@ function DiscoverYourDestinations() {
   function zoomIn() { zoomBy(0.8) }
   function zoomOut() { zoomBy(1.25) }
 
+  // Animate viewBox from current to target over duration (ms)
+  function animateViewBox(target, duration = 400) {
+    const svg = svgRef.current
+    if (!svg) return
+    const startVB = getCurrentVB()
+    if (!startVB) return
+
+    const startTime = performance.now()
+    const diff = {
+      x: target.x - startVB.x,
+      y: target.y - startVB.y,
+      w: target.w - startVB.w,
+      h: target.h - startVB.h,
+    }
+
+    function step(now) {
+      const elapsed = Math.min((now - startTime) / duration, 1)
+      const ease = elapsed < 1 ? 1 - Math.pow(1 - elapsed, 2) : 1 // easeOutQuad
+      const next = {
+        x: startVB.x + diff.x * ease,
+        y: startVB.y + diff.y * ease,
+        w: startVB.w + diff.w * ease,
+        h: startVB.h + diff.h * ease,
+      }
+      setVB(next)
+      if (elapsed < 1) {
+        requestAnimationFrame(step)
+      } else {
+        setVB(target)
+      }
+    }
+    requestAnimationFrame(step)
+  }
+
   function zoomToPath(path) {
     const svg = svgRef.current
     if (!svg) return
@@ -207,13 +272,15 @@ function DiscoverYourDestinations() {
     const y = bbox.y - pad
     const w = bbox.width + pad * 2
     const h = bbox.height + pad * 2
-    setVB(clampToDefault({ x, y, w, h }))
+    const target = clampToDefault({ x, y, w, h })
+    animateViewBox(target)
   }
 
   function resetZoom() {
     const svg = svgRef.current
     if (svg && defaultVBStrRef.current) {
-      svg.setAttribute('viewBox', defaultVBStrRef.current)
+      const target = parseViewBoxStr(defaultVBStrRef.current)
+      animateViewBox(target)
     }
   }
 
@@ -224,14 +291,14 @@ function DiscoverYourDestinations() {
     paths.forEach(p => {
       const isSelected = p.dataset.name === stateName
       if (isSelected) {
-        p.setAttribute('stroke', '#1f2937')
+        p.setAttribute('stroke', '#FF7125')
         p.setAttribute('stroke-width', '1.5')
-        p.setAttribute('fill', '#fde68a')
+        p.setAttribute('fill', '#ff712510')
       } else {
-        p.setAttribute('stroke', '#4b5563')
-        p.setAttribute('stroke-width', '0.5')
-        const orig = p.dataset.origFill || '#e5e7eb'
-        p.setAttribute('fill', orig)
+        // Restore gradient fill and default stroke for non-selected
+        p.setAttribute('stroke', '#4A9BD4')
+        p.setAttribute('stroke-width', '1')
+        p.setAttribute('fill', 'url(#paint0_linear_893_4441)')
       }
     })
   }
