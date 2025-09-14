@@ -72,7 +72,7 @@ export default function Home() {
 
         <div className="relative z-10 px-4 mt-16">
           <div className="inline-block bg-teal-100 text-teal-900 px-4 py-1 mb-8 rounded-full text-sm font-medium shadow-md">
-            India,s first comprehensive flight Discovery Platform
+            Indias first comprehensive flight Discovery Platform
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
