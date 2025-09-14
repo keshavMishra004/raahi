@@ -16,6 +16,7 @@ function DiscoverYourDestinations() {
   const [allStates, setAllStates] = useState([])
   const [selectedState, setSelectedState] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [isZoomed, setIsZoomed] = useState(false);
 
   // Placeholder categories (adjust to your taxonomy)
   const CATEGORIES = [
@@ -31,30 +32,30 @@ function DiscoverYourDestinations() {
   // Placeholder DB: Map of State -> Services (replace with real data or API)
   const SERVICES_DB = {
     'Goa': [
-      { name: 'Parasailing - Calangute', category: 'Aerial Activities', location: 'Calangute' },
-      { name: 'Private Yacht Charter', category: 'Charters', location: 'Panaji' },
-      { name: 'Jet Skiing - Baga', category: 'Water Sports', location: 'Baga' },
+      { name: 'Parasailing - Calangute', category: 'Aerial Activities', location: 'Calangute', rating: 4.3 },
+      { name: 'Private Yacht Charter', category: 'Charters', location: 'Panaji', rating: 3.9 },
+      { name: 'Jet Skiing - Baga', category: 'Water Sports', location: 'Baga', rating: 2.7 },
     ],
     'Maharashtra': [
-      { name: 'Helicopter Joyride - Mumbai', category: 'Aerial Activities', location: 'Mumbai' },
-      { name: 'Private Seaplane Charter', category: 'Charters', location: 'Mumbai' },
-      { name: 'Kundalika River Rafting', category: 'Adventure', location: 'Kolad' },
+      { name: 'Helicopter Joyride - Mumbai', category: 'Aerial Activities', location: 'Mumbai', rating: 2.2 },
+      { name: 'Private Seaplane Charter', category: 'Charters', location: 'Mumbai', rating: 4.7 },
+      { name: 'Kundalika River Rafting', category: 'Adventure', location: 'Kolad', rating: 4.3 },
     ],
     'Rajasthan': [
-      { name: 'Hot Air Balloon - Jaipur', category: 'Aerial Activities', location: 'Jaipur' },
-      { name: 'Desert Safari - Jaisalmer', category: 'Adventure', location: 'Jaisalmer' },
-      { name: 'Heritage Walk - Udaipur', category: 'Cultural', location: 'Udaipur' },
+      { name: 'Hot Air Balloon - Jaipur', category: 'Aerial Activities', location: 'Jaipur', rating: 3.5 },
+      { name: 'Desert Safari - Jaisalmer', category: 'Adventure', location: 'Jaisalmer', rating: 3 },
+      { name: 'Heritage Walk - Udaipur', category: 'Cultural', location: 'Udaipur', rating: 4.1 },
     ],
     'Delhi': [
-      { name: 'Helicopter City Tour', category: 'Aerial Activities' },
-      { name: 'Luxury Limo Charter', category: 'Charters' },
-      { name: 'Heritage Food Walk', category: 'Cultural' },
+      { name: 'Helicopter City Tour', category: 'Aerial Activities', rating: 2.3 },
+      { name: 'Luxury Limo Charter', category: 'Charters', rating: 5 },
+      { name: 'Heritage Food Walk', category: 'Cultural', rating: 3.8 },
     ],
     'Uttar Pradesh': [
-      { name: 'Ganga Aarti Cruise', category: 'Charters', location: 'Varanasi' },
-      { name: 'Wildlife Safari - Dudhwa', category: 'Wildlife' },
-      { name: 'Agra Heritage Tour', category: 'Cultural', location: 'Agra' },
-      { name: 'Falana Falana Trek', category: 'Pilgrim', location: 'Prayagraj' }
+      { name: 'Ganga Aarti Cruise', category: 'Charters', location: 'Varanasi', rating: 3.4 },
+      { name: 'Wildlife Safari - Dudhwa', category: 'Wildlife', rating: 4 },
+      { name: 'Agra Heritage Tour', category: 'Cultural', location: 'Agra', rating: 2.2 },
+      { name: 'Falana Falana Trek', category: 'Pilgrim', location: 'Prayagraj', rating: 4.3 }
     ],
     // ...add more states as needed
   }
@@ -105,6 +106,35 @@ function DiscoverYourDestinations() {
     svg.style.height = '100%'
     svg.style.display = 'block'
 
+    // --- Inject gradient into <defs> if not present ---
+    let defs = svg.querySelector('defs')
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+      svg.insertBefore(defs, svg.firstChild)
+    }
+    // Remove any previous gradient with this id
+    const oldGrad = defs.querySelector('#paint0_linear_893_4441')
+    if (oldGrad) oldGrad.remove()
+    // Add the gradient
+    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
+    grad.setAttribute('id', 'paint0_linear_893_4441')
+    grad.setAttribute('x1', '0')
+    grad.setAttribute('y1', '0')
+    grad.setAttribute('x2', '0')
+    grad.setAttribute('y2', '1')
+    grad.setAttribute('gradientUnits', 'objectBoundingBox')
+    // Use objectBoundingBox for relative gradient on each path
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
+    stop1.setAttribute('offset', '0%')
+    stop1.setAttribute('stop-color', 'white')
+    grad.appendChild(stop1)
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
+    stop2.setAttribute('offset', '100%')
+    stop2.setAttribute('stop-color', '#DFFEFF')
+    grad.appendChild(stop2)
+    defs.appendChild(grad)
+
+    // Set all paths to use the gradient fill and default stroke
     const paths = Array.from(svg.querySelectorAll('path'))
     const names = new Set()
     paths.forEach(p => {
@@ -123,16 +153,18 @@ function DiscoverYourDestinations() {
       p.dataset.name = stateName
       names.add(stateName)
       p.style.cursor = 'pointer'
+      // Set default fill/stroke/stroke-width for each path
+      p.setAttribute('fill', 'url(#paint0_linear_893_4441)')
+      p.setAttribute('stroke', '#4A9BD4')
+      p.setAttribute('stroke-width', '0.3%')
       if (!p.dataset.origFill) {
-        const origFill = p.getAttribute('fill') || ''
-        p.dataset.origFill = origFill
+        p.dataset.origFill = 'url(#paint0_linear_893_4441)'
       }
       p.addEventListener('click', () => onSelectState(stateName, p))
       p.addEventListener('mouseenter', () => p.setAttribute('opacity', '0.9'))
       p.addEventListener('mouseleave', () => p.removeAttribute('opacity'))
     })
 
-    // Populate dropdown
     setAllStates(Array.from(names).sort((a, b) => a.localeCompare(b)))
   }
 
@@ -193,10 +225,54 @@ function DiscoverYourDestinations() {
       w: newW,
       h: newH,
     })
-    setVB(next)
+    // Use a faster duration for zoom in/out
+    animateViewBox(next, 180)
+    setIsZoomed(true)
   }
   function zoomIn() { zoomBy(0.8) }
   function zoomOut() { zoomBy(1.25) }
+
+  // Animate viewBox from current to target over duration (ms)
+  // Make zooming faster and snappier (duration = 180ms for zoom, 400ms for state select/reset)
+  function animateViewBox(target, duration = 400) {
+    const svg = svgRef.current
+    if (!svg) return
+    const startVB = getCurrentVB()
+    if (!startVB) return
+
+    // Check if target is default viewBox
+    const isDefault =
+      defaultVBStrRef.current &&
+      `${target.x} ${target.y} ${target.w} ${target.h}` === defaultVBStrRef.current;
+    setIsZoomed(!isDefault);
+
+    const startTime = performance.now()
+    const diff = {
+      x: target.x - startVB.x,
+      y: target.y - startVB.y,
+      w: target.w - startVB.w,
+      h: target.h - startVB.h,
+    }
+
+    function step(now) {
+      const elapsed = Math.min((now - startTime) / duration, 1)
+      // Use a slightly more aggressive ease for snappier feel
+      const ease = elapsed < 1 ? 1 - Math.pow(1 - elapsed, 2.5) : 1
+      const next = {
+        x: startVB.x + diff.x * ease,
+        y: startVB.y + diff.y * ease,
+        w: startVB.w + diff.w * ease,
+        h: startVB.h + diff.h * ease,
+      }
+      setVB(next)
+      if (elapsed < 1) {
+        requestAnimationFrame(step)
+      } else {
+        setVB(target)
+      }
+    }
+    requestAnimationFrame(step)
+  }
 
   function zoomToPath(path) {
     const svg = svgRef.current
@@ -207,13 +283,15 @@ function DiscoverYourDestinations() {
     const y = bbox.y - pad
     const w = bbox.width + pad * 2
     const h = bbox.height + pad * 2
-    setVB(clampToDefault({ x, y, w, h }))
+    const target = clampToDefault({ x, y, w, h })
+    animateViewBox(target)
   }
 
   function resetZoom() {
     const svg = svgRef.current
     if (svg && defaultVBStrRef.current) {
-      svg.setAttribute('viewBox', defaultVBStrRef.current)
+      const target = parseViewBoxStr(defaultVBStrRef.current)
+      animateViewBox(target)
     }
   }
 
@@ -224,14 +302,14 @@ function DiscoverYourDestinations() {
     paths.forEach(p => {
       const isSelected = p.dataset.name === stateName
       if (isSelected) {
-        p.setAttribute('stroke', '#1f2937')
-        p.setAttribute('stroke-width', '1.5')
-        p.setAttribute('fill', '#fde68a')
+        p.setAttribute('stroke', '#FF7125')
+        p.setAttribute('stroke-width', '0.3%')
+        p.setAttribute('fill', '#ff712510')
       } else {
-        p.setAttribute('stroke', '#4b5563')
-        p.setAttribute('stroke-width', '0.5')
-        const orig = p.dataset.origFill || '#e5e7eb'
-        p.setAttribute('fill', orig)
+        // Restore gradient fill and default stroke for non-selected
+        p.setAttribute('stroke', '#4A9BD4')
+        p.setAttribute('stroke-width', '0.3%')
+        p.setAttribute('fill', 'url(#paint0_linear_893_4441)')
       }
     })
   }
@@ -268,6 +346,20 @@ function DiscoverYourDestinations() {
     setSelectedCategory(e.target.value)
   }
 
+  function handleReset() {
+    setSelectedState('')
+    setSelectedCategory('All')
+    setTimeout(() => {
+      const svg = svgRef.current
+      if (svg && defaultVBStrRef.current) {
+        const target = parseViewBoxStr(defaultVBStrRef.current)
+        animateViewBox(target, 400) // keep reset smooth and a bit slower
+        setIsZoomed(false)
+      }
+      highlightState('')
+    }, 0)
+  }
+
   return (
     <section className="discover-your-dest">
       <h3 className="section-title hero">DISCOVER YOUR DESTINATION</h3>
@@ -278,13 +370,29 @@ function DiscoverYourDestinations() {
           <h4 className='locations-head'>Locations:</h4>
           {/* dynamically fetched list of services/locations */}
           {selectedState && services.length > 0 && (
-            services.map((srv, i) => (
-              <div className="service-card" key={`${srv.name}-${i}`}>
-                <h5 className='service-title'>{srv.name}</h5>
-                <p>⭐⭐⭐ 3.2</p>
-                <p className='service-location'>{srv.location || selectedState}</p>
-              </div>
-            ))
+            services.map((srv, i) => {
+              // Dynamic stars based on rating (show half star if needed)
+              const rating = srv.rating || 0;
+              const fullStars = Math.round(rating);
+              const hasHalfStar = rating - fullStars >= 0.25 && rating - fullStars < 0.75;
+              const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+              return (
+                <div className="service-card" key={`${srv.name}-${i}`}>
+                  <h5 className='service-title'>{srv.name}</h5>
+                  <p>
+                    {Array(fullStars).fill().map((_, idx) => <span className='star' key={`f${idx}`}>★</span>)}
+                    {hasHalfStar ? <span className='star' key="half">⯨</span> : null}
+                    {Array(emptyStars).fill().map((_, idx) => <span className='star' key={`e${idx}`}>☆</span>)}
+                    <span className='rating'>{srv.rating}</span>
+                  </p>
+                  <p className='service-location'>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+                      <path d="M8.00065 15.1666C7.8451 15.1666 7.71176 15.1221 7.60065 15.0333C7.48954 14.9444 7.40621 14.8277 7.35065 14.6833C7.13954 14.061 6.87287 13.4777 6.55065 12.9333C6.23954 12.3888 5.80065 11.7499 5.23398 11.0166C4.66732 10.2833 4.20621 9.58325 3.85065 8.91658C3.50621 8.24992 3.33398 7.44436 3.33398 6.49992C3.33398 5.19992 3.78398 4.09992 4.68398 3.19992C5.5951 2.28881 6.70065 1.83325 8.00065 1.83325C9.30065 1.83325 10.4007 2.28881 11.3007 3.19992C12.2118 4.09992 12.6673 5.19992 12.6673 6.49992C12.6673 7.51103 12.4729 8.35547 12.084 9.03325C11.7062 9.69992 11.2673 10.361 10.7673 11.0166C10.1673 11.8166 9.71176 12.4833 9.40065 13.0166C9.10065 13.5388 8.85065 14.0944 8.65065 14.6833C8.5951 14.8388 8.50621 14.961 8.38399 15.0499C8.27287 15.1277 8.1451 15.1666 8.00065 15.1666ZM8.00065 8.16658C8.46732 8.16658 8.86176 8.00547 9.18398 7.68325C9.50621 7.36103 9.66732 6.96658 9.66732 6.49992C9.66732 6.03325 9.50621 5.63881 9.18398 5.31658C8.86176 4.99436 8.46732 4.83325 8.00065 4.83325C7.53398 4.83325 7.13954 4.99436 6.81732 5.31658C6.4951 5.63881 6.33398 6.03325 6.33398 6.49992C6.33398 6.96658 6.4951 7.36103 6.81732 7.68325C7.13954 8.00547 7.53398 8.16658 8.00065 8.16658Z" fill="#FF7125"/>
+                    </svg>{srv.location || selectedState}
+                  </p>
+                </div>
+              );
+            })
           )}
           {!selectedState && (
             <p className="muted">Select a state to view available services.</p>
@@ -316,6 +424,14 @@ function DiscoverYourDestinations() {
             </select>
           </div>
           <div className='zoom-options'>
+            <button
+              type="button"
+              className="reset-btn"
+              onClick={handleReset}
+              disabled={!selectedState && !isZoomed}
+            >
+              Reset
+            </button>
             <button type="button" className="zoom-btn" onClick={zoomIn}>+</button>
             <button type="button" className="zoom-btn" onClick={zoomOut}>−</button>
           </div>

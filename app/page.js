@@ -102,36 +102,13 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-b from-[#032B41] to-[#FCEFE8] pointer-events-none" />
       </section>
 
-      {/* Why Choose Us Section */}
       <WhyChooseUs />
-
-      {/* Testimonials */}
-      <Testimonials />
-
 
       <FeaturedServices />
 
-      {/* <section
-=======
       <DiscoverYourDestinations />
 
       <Testimonials/>
-
-      <section
-
-        id="aerial"
-        className="h-screen flex items-center justify-center bg-white"
-      >
-        <h2 className="text-4xl font-bold text-gray-800">Aerial Services</h2>
-      </section> */}
-
-      {/* Pilgrimage Flights Section */}
-      {/* <section
-        id="pilgrimage"
-        className="h-screen flex items-center justify-center bg-gray-200"
-      >
-        <h2 className="text-4xl font-bold text-gray-800">Pilgrimage Flights</h2>
-      </section> */}
 
       <BookAFlight />
 
