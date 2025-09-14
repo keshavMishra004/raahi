@@ -56,6 +56,16 @@ font-family: Inter;
 font-size: 16px;
 font-weight: 400;
 }
+.service-card .star {
+  color: #FF7125;
+  font-size: 1.4rem;
+  line-height: 0;
+}
+.service-card .rating {
+  color: #FF7125;
+  font-family: Instrument Sans;
+}
+
 .map-div {
   width: 40%;
   height: var(--map-height, 385px); /* control height here */
@@ -103,7 +113,8 @@ margin: 0.5em 0;
   padding: 1em;
   gap: 1em;
 }
-.zoom-btn {
+.zoom-btn, .reset-btn {
+  color: #054972;
   width: 40px;
   height: 40px;
   border-radius: 12px;
@@ -115,4 +126,9 @@ margin: 0.5em 0;
   place-items: center;
   box-shadow: 0 2px 10px rgba(2, 24, 33, 0.12);
   cursor: pointer;
+}
+.reset-btn {
+  width: 80px;
+  font-family: Inter;
+  font-size: 18px;
 }
