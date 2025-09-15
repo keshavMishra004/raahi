@@ -70,3 +70,45 @@
   border-radius: 10px;
   box-shadow: none;
 }
+
+@media(max-width: 1000px) {
+  .featured-option {
+    width: 200px;
+  }
+}
+@media(max-width: 768px) {
+  .featured-container {
+    flex-direction: column-reverse;
+    gap: 3px;
+  }
+  .featured-options {
+    flex-direction: row;
+    gap: 3px;
+    overflow: hidden;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .featured-option {
+    padding: 10px;
+    /* width: 25%; */
+    text-align: center;
+  }
+  .featured-frame {
+    width: 100%;
+    height: 60vh;
+  }
+  .featured-services h2 {
+    margin: 2rem 1rem 1rem 1rem;
+  }
+  .featured-services {
+    margin: 0;
+  }
+}
+@media(max-width: 500px) {
+  .featured-option {
+    font-size: 14px;
+    padding: 0;
+    border-radius: 10px;
+    width: 25%;
+  }
+}

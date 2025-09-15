@@ -26,6 +26,7 @@
   padding: 1em;
   width: 30%;
   overflow: auto;
+  z-index: 1;
 }
 .locations-div::-webkit-scrollbar {
   display: none;
@@ -56,6 +57,10 @@ font-family: Inter;
 font-size: 16px;
 font-weight: 400;
 }
+.service-location svg {
+  display: inline;
+  margin-bottom: 2px;
+}
 .service-card .star {
   color: #FF7125;
   font-size: 1.4rem;
@@ -64,6 +69,7 @@ font-weight: 400;
 .service-card .rating {
   color: #FF7125;
   font-family: Instrument Sans;
+  margin-left: 5px;
 }
 
 .map-div {
@@ -131,4 +137,14 @@ margin: 0.5em 0;
   width: 80px;
   font-family: Inter;
   font-size: 18px;
+}
+.zoom-btn:active, .reset-btn:active {
+  background: #e5e7eb;
+}
+
+@media(max-width: 100px) {
+  .dest-card {
+    margin: 0 auto;
+    background-color: #000;
+  }
 }
