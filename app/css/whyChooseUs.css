@@ -23,8 +23,12 @@
 }
 
 .features {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 1 row, 5 columns */
+    /* display: grid; */
+    /* grid-template-columns: repeat(5, 1fr); */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 0.5em;
     padding: 0 1em;
 }
@@ -91,4 +95,27 @@
 .animated-feature-card {
   /* Framer handles transform/opacity, but you can add extra styles here if needed */
   will-change: transform, opacity;
+}
+
+@media(max-width: 680px) {
+    .why-choose-us {
+        padding: 2em 0 3em 0;
+    }
+    .feature-card {
+        width: 115px;
+    }
+    .why-choose-us svg {
+        width: 40px;
+        height: 40px;
+    }
+    .features {
+        padding: 0;
+    }
+    .why-choose-us h2 {
+        margin: 0 1rem;
+    }
+    .why-choose-us .subtitle {
+        margin: 0 1rem 1rem 1rem;
+        font-size: 14px;
+    }
 }

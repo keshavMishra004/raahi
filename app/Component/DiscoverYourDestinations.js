@@ -13,10 +13,19 @@ function DiscoverYourDestinations() {
   const defaultVBStrRef = useRef(null) // string
   const defaultVBRef = useRef(null)    // {x,y,w,h}
 
-  const [allStates, setAllStates] = useState([])
   const [selectedState, setSelectedState] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [isZoomed, setIsZoomed] = useState(false);
+  
+  // Hardcoded list of states (simulate backend)
+  const STATES = [
+    'Goa',
+    'Maharashtra',
+    'Rajasthan',
+    'Delhi',
+    'Uttar Pradesh',
+    // ...add more as needed
+  ];
 
   // Placeholder categories (adjust to your taxonomy)
   const CATEGORIES = [
@@ -165,7 +174,54 @@ function DiscoverYourDestinations() {
       p.addEventListener('mouseleave', () => p.removeAttribute('opacity'))
     })
 
-    setAllStates(Array.from(names).sort((a, b) => a.localeCompare(b)))
+    // --- Add pin SVGs to states with services ---
+    // Remove any previous pins
+    Array.from(svg.querySelectorAll('.state-pin')).forEach(pin => pin.remove())
+
+    // Pin colors (cycled)
+    const pinColors = ['#42D4E2', '#FFC639', '#FF658E', '#FF983B']
+    const serviceStates = Object.keys(SERVICES_DB)
+
+    // Helper to add pins (used initially and after zoom)
+    function addPins() {
+      // Remove old pins
+      Array.from(svg.querySelectorAll('.state-pin')).forEach(pin => pin.remove())
+      serviceStates.forEach((state, idx) => {
+        const path = Array.from(svg.querySelectorAll('path')).find(p => p.dataset.name === state)
+        if (!path) return
+        // Calculate centroid of the path
+        const centroid = getPathCentroid(path)
+        const cx = centroid.x
+        const cy = centroid.y
+        const color = pinColors[idx % pinColors.length]
+        // Use a <g> with transform for pin placement and scaling
+        const vb = svg.viewBox.baseVal || { width: 100, height: 100 }
+        const svgWidth = vb.width || 100
+        // Pin width as 6% of SVG width
+        const pinWidth = svgWidth * 0.06
+        const pinHeight = pinWidth * (21 / 14)
+        const scale = pinWidth / 14
+        const pinGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+        pinGroup.setAttribute('class', 'state-pin')
+        pinGroup.setAttribute('pointer-events', 'none')
+        // Center the pin at (cx, cy) by translating and scaling
+        pinGroup.setAttribute(
+          'transform',
+          `translate(${cx - pinWidth / 2},${cy - pinHeight}) scale(${scale})`
+        )
+        const pinPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        pinPath.setAttribute('d', 'M7 17.6592C4.65 15.9194 2.89567 14.2298 1.737 12.5905C0.579 10.9511 0 9.34514 0 7.77267C0 6.58496 0.212667 5.54345 0.638 4.64814C1.06267 3.75351 1.60833 3.00508 2.275 2.40286C2.94167 1.80064 3.69167 1.34897 4.525 1.04786C5.35833 0.746747 6.18333 0.596191 7 0.596191C7.81667 0.596191 8.64167 0.746747 9.475 1.04786C10.3083 1.34897 11.0583 1.80064 11.725 2.40286C12.3917 3.00508 12.9377 3.75351 13.363 4.64814C13.7877 5.54345 14 6.58496 14 7.77267C14 9.34514 13.4207 10.9511 12.262 12.5905C11.104 14.2298 9.35 15.9194 7 17.6592ZM7 9.62953C7.55 9.62953 8.021 9.4328 8.413 9.03935C8.80434 8.64656 9 8.17415 9 7.62212C9 7.07008 8.80434 6.59734 8.413 6.20388C8.021 5.8111 7.55 5.61471 7 5.61471C6.45 5.61471 5.97933 5.8111 5.588 6.20388C5.196 6.59734 5 7.07008 5 7.62212C5 8.17415 5.196 8.64656 5.588 9.03935C5.97933 9.4328 6.45 9.62953 7 9.62953ZM0 20.6703L0 18.6629H14V20.6703H0Z')
+        pinPath.setAttribute('fill', color)
+        pinPath.setAttribute('stroke-width', 0)
+        pinGroup.appendChild(pinPath)
+        svg.appendChild(pinGroup)
+      })
+    }
+
+    addPins()
+
+    // Patch zoomBy, zoomIn, zoomOut, animateViewBox, and resetZoom to re-add pins after zoom/pan
+    svg._addPins = addPins // attach for use in other functions
   }
 
   function normalizeStateName(raw) {
@@ -265,10 +321,12 @@ function DiscoverYourDestinations() {
         h: startVB.h + diff.h * ease,
       }
       setVB(next)
+      if (svg._addPins) svg._addPins() // <-- re-add pins after viewBox change
       if (elapsed < 1) {
         requestAnimationFrame(step)
       } else {
         setVB(target)
+        if (svg._addPins) svg._addPins()
       }
     }
     requestAnimationFrame(step)
@@ -309,8 +367,16 @@ function DiscoverYourDestinations() {
         // Restore gradient fill and default stroke for non-selected
         p.setAttribute('stroke', '#4A9BD4')
         p.setAttribute('stroke-width', '0.3%')
-        p.setAttribute('fill', 'url(#paint0_linear_893_4441)')
+        // Only set fill if not already highlighted
+        if (p.getAttribute('fill') !== '#ff712510') {
+          p.setAttribute('fill', 'url(#paint0_linear_893_4441)')
+        }
       }
+    })
+    // Ensure pin colors are not affected by highlight
+    Array.from(svg.querySelectorAll('.state-pin path')).forEach((pinPath, idx) => {
+      const pinColors = ['#42D4E2', '#FFC639', '#FF658E', '#FF983B']
+      pinPath.setAttribute('fill', pinColors[idx % pinColors.length])
     })
   }
 
@@ -412,7 +478,7 @@ function DiscoverYourDestinations() {
           <div className='select-options'>
             <select className="map-options" value={selectedState} onChange={handleStateChange}>
               <option value="">Select a State</option>
-              {allStates.map(s => <option key={s} value={s}>{s}</option>)}
+              {STATES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
             <select
               className="map-options"
@@ -442,3 +508,24 @@ function DiscoverYourDestinations() {
 }
 
 export default DiscoverYourDestinations
+
+// Helper to calculate centroid of a path
+function getPathCentroid(path) {
+  try {
+    const length = path.getTotalLength()
+    let points = []
+    // Sample points along the path
+    for (let i = 0; i < length; i += Math.max(1, length / 100)) {
+      const pt = path.getPointAtLength(i)
+      points.push([pt.x, pt.y])
+    }
+    // Calculate average x and y
+    const n = points.length
+    const sum = points.reduce((acc, p) => [acc[0] + p[0], acc[1] + p[1]], [0, 0])
+    return { x: sum[0] / n, y: sum[1] / n }
+  } catch {
+    // fallback to bbox center
+    const bbox = path.getBBox()
+    return { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 }
+  }
+}
