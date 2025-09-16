@@ -145,3 +145,36 @@ font-weight: 400;
   width: 30px;
   height: 30px;
 }
+
+@media(max-width: 760px) {
+  .footer-links {
+    grid-template-columns: repeat(2, 2fr);
+  }
+  .footer-row-2 {
+    align-items: center;
+  }
+}
+@media(max-width: 630px) {
+  .footer-social {
+    margin: 0;
+  }
+}
+@media(max-width: 550px) {
+  .footer-content {
+    padding: 0 1rem;
+  }
+  .footer-logo-col {
+    margin: 0;
+  }
+  .footer-row-2 {
+    flex-direction: column;
+    gap: 2em;
+    padding-bottom: 0;
+  }
+  .footer-social {
+    align-items: center;
+  }
+  .footer-copyright {
+    font-size: 14px;
+  }
+}

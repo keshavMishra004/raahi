@@ -122,3 +122,24 @@ font-style: normal;
 font-weight: 400;
 line-height: normal;
 }
+
+@media(max-width: 480px) {
+    .need-a-help {
+        padding: 0;
+    }
+    .help-container {
+        margin: 3em 1em;
+    }
+    .need-a-help h3 {
+        font-size: 24px;
+    }
+    .need-a-help p {
+        font-size: 16px;
+    }
+    .need-a-help textarea {
+        max-width: 90vw;
+    }
+    .need-a-help button {
+        padding: 8px 12px;
+    }
+}

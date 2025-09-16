@@ -100,7 +100,7 @@
     padding: 0 1em;
   }
   .featured-services h2 {
-    margin: 2rem 1rem 1rem 1rem;
+    margin: 3rem 1rem 1rem 1rem;
   }
   .featured-services {
     margin: 0;
@@ -112,5 +112,8 @@
     padding: 0;
     border-radius: 10px;
     width: 7.11em;
+  }
+  .featured-services h2 {
+    font-size: 24px;
   }
 }
