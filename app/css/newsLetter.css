@@ -60,13 +60,12 @@ align-items: center;
         margin: 0.5em 1em 0 0;
     }
     .newsletter-form {
-        width: 100vw;
         flex-direction: column;
         padding: 1em;
         align-items: start;
     }
     .newsletter input {
-        width: 280px;
+        width: auto;
         height: 40px;
     }
     .newsletter button {
