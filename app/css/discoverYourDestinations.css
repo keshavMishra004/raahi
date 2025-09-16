@@ -99,7 +99,7 @@ font-weight: 400;
   flex-direction: column;
   padding: 1em;
 }
-select {
+.discover-your-dest select {
   color: #2DA0A2;
 font-family: "Instrument Sans";
 font-size: 16px;
@@ -142,9 +142,44 @@ margin: 0.5em 0;
   background: #e5e7eb;
 }
 
-@media(max-width: 100px) {
+@media(max-width: 1000px) {
   .dest-card {
-    margin: 0 auto;
-    background-color: #000;
+    margin: 0 1em 4em;
+  }
+}
+@media(max-width: 768px) {
+  .section-title {
+    margin: 2rem 1rem 0.5rem 1rem;
+  }
+}
+@media(max-width: 550px) {
+  .dest-card {
+    flex-direction: column-reverse;
+    height: auto;
+    position: relative;
+  }
+  .locations-div {
+    width: 100%;
+    border-radius: 0 0 20px 20px;
+  }
+  .map-div {
+    width: 100%;
+  }
+  .options-div {
+    width: 50%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 385px;
+    pointer-events: none;
+  }
+  .discover-your-dest select {
+    padding: 2px 5px;
+    pointer-events: auto;
+    backdrop-filter: blur(2px);
+    background: rgba(255, 255, 255, 0.9);
+  }
+  .reset-btn, .zoom-btn {
+    pointer-events: auto;
   }
 }
