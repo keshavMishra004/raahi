@@ -7,10 +7,10 @@ import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 
 const servicesData = [
-  { id: "fly-bharat", title: "Fly Bharat (UDAN)", description: "Affordable regional flights.", image: "/fly-bharat.jpg" },
-  { id: "charters", title: "Charters", description: "Private, Air Ambulance, Empty Leg.", image: "/charters.jpeg" },
-  { id: "aerial", title: "Aerial Services", description: "Aero sports & tourism.", image: "/sky-diving.png" },
-  { id: "pilgrimage", title: "Pilgrimage Flights", description: "Spiritual journeys made easy.", image: "/pilgm.png" },
+  { id: "fly-bharat", title: "Fly Bharat (UDAN)", description: "Affordable regional flights.", image: "/img/fly-bharat.jpg" },
+  { id: "charters", title: "Charters", description: "Private, Air Ambulance, Empty Leg.", image: "/img/charters.jpeg" },
+  { id: "aerial", title: "Aerial Services", description: "Aero sports & tourism.", image: "/img/sky-diving.png" },
+  { id: "pilgrimage", title: "Pilgrimage Flights", description: "Spiritual journeys made easy.", image: "/img/pilgm.png" },
 ];
 
 export default function ServiceCards() {

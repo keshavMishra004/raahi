@@ -1,5 +1,5 @@
 import React from 'react'
-import '../css/needAHelp.css'
+import '../../css/needAHelp.css'
 
 function NeedAHelp() {
   return (

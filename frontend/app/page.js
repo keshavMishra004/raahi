@@ -1,16 +1,15 @@
 import { Moon, Heart, User } from "lucide-react";
 import { Poppins } from "next/font/google";
-import ScrollSpyNav from "./scrollSpyNav";
-import Testimonials from "./Component/Testimonial/Testimonials";
-import Services from "./Component/Services/Services";
-import WhyChooseUs from "./Component/WhyChooseUs";
-import FeaturedServices from "./Component/FeaturedServices.js";
-import Footer from "./Component/Footer.js";
-import NeedAHelp from "./Component/NeedAHelp.js";
-import BookAFlight from "./Component/BookAFlight.js";
-import DiscoverYourDestinations from "./Component/DiscoverYourDestinations.js";
-import NewsLetter from "./Component/NewsLetter.js";
-
+import ScrollSpyNav from "./Component/homepage/scrollSpyNav";
+import Testimonials from "./Component/homepage/testimonial/Testimonials";
+import Services from "./Component/homepage/services/Services";
+import WhyChooseUs from "./Component/homepage/whyChooseUs/WhyChooseUs";
+import FeaturedServices from "./Component/homepage/featuredServices/FeaturedServices.js";
+import Footer from "./Component/homepage/Footer.js";
+import NeedAHelp from "./Component/homepage/NeedAHelp.js";
+import BookAFlight from "./Component/homepage/BookAFlight.js";
+import DiscoverYourDestinations from "./Component/homepage/DiscoverYourDestinations.js";
+import NewsLetter from "./Component/homepage/NewsLetter.js";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -64,7 +63,7 @@ export default function Home() {
         className="relative flex items-center justify-center text-center text-white"
         style={{
           height: "100vh",
-          backgroundImage: "url('/air-plane-bg.jpeg')",
+          backgroundImage: "url('/img/air-plane-bg.jpeg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

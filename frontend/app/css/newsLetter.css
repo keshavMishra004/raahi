@@ -45,6 +45,14 @@ display: flex;
 justify-content: center;
 align-items: center;
 }
+.newsletter button:hover {
+  background: #FF7125F0;
+  color: #fff;
+}
+
+.newsletter button:active {
+  transform: scale(0.9);
+}
 
 @media(max-width: 580px) {
     .newsletter {

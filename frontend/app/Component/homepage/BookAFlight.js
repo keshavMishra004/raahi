@@ -1,5 +1,5 @@
 import React from 'react'
-import '../css/bookAFlight.css'
+import '../../css/bookAFlight.css'
 
 function BookAFlight() {
   return (

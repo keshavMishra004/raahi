@@ -1,5 +1,5 @@
 .book-a-flight {
-    background: url('/bookAFlight.png') lightgray 50% / cover no-repeat;
+    background: url('/img/bookAFlight.png') lightgray 50% / cover no-repeat;
     height: 90vh;
     width: 100%;
     display: flex;

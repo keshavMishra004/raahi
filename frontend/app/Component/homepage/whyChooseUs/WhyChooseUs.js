@@ -1,5 +1,5 @@
 import React from 'react'
-import '../css/whyChooseUs.css'
+import '../../../css/whyChooseUs.css'
 import WhyChooseUsClient from './WhyChooseUsClient'
 
 const features = [

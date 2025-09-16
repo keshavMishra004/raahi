@@ -1,6 +1,6 @@
 import React from "react";
 import FeaturedServicesClient from "./FeaturedServicesClient";
-import "../css/featuredServices.css";
+import "../../../css/featuredServices.css";
 
 const services = [
   { name: "Private Charter", imageUrl: '/img/privateCharter.jpg' },

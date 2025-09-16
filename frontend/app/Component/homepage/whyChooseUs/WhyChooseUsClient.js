@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef } from 'react'
-import '../css/whyChooseUs.css'
+import '../../../css/whyChooseUs.css'
 import { motion, useInView } from 'framer-motion'
 
 const features = [

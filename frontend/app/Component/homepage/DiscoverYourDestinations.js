@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import "../css/discoverYourDestinations.css"
+import "../../css/discoverYourDestinations.css"
 
 function DiscoverYourDestinations() {
   // Small map refs

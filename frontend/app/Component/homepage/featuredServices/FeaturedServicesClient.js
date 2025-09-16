@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
-import "../css/featuredServices.css";
+import "../../../css/featuredServices.css";
 
 const services = [
   { name: "Private Charter", imageUrl: '/img/privateCharter.jpg' },
