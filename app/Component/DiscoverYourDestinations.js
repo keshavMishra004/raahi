@@ -162,17 +162,31 @@ function DiscoverYourDestinations() {
       p.dataset.name = stateName
       names.add(stateName)
       p.style.cursor = 'pointer'
-      // Set default fill/stroke/stroke-width for each path
       p.setAttribute('fill', 'url(#paint0_linear_893_4441)')
       p.setAttribute('stroke', '#4A9BD4')
       p.setAttribute('stroke-width', '0.3%')
       if (!p.dataset.origFill) {
         p.dataset.origFill = 'url(#paint0_linear_893_4441)'
       }
-      p.addEventListener('click', () => onSelectState(stateName, p))
-      p.addEventListener('mouseenter', () => p.setAttribute('opacity', '0.9'))
-      p.addEventListener('mouseleave', () => p.removeAttribute('opacity'))
+      // Remove individual listeners for performance
+      // p.addEventListener('click', () => onSelectState(stateName, p))
+      // p.addEventListener('mouseenter', () => p.setAttribute('opacity', '0.9'))
+      // p.addEventListener('mouseleave', () => p.removeAttribute('opacity'))
     })
+
+    // Event delegation for click/hover
+    svg.onpointerdown = function(e) {
+      const p = e.target.closest('path')
+      if (p && p.dataset.name) onSelectState(p.dataset.name, p)
+    }
+    svg.onpointerover = function(e) {
+      const p = e.target.closest('path')
+      if (p) p.setAttribute('opacity', '0.9')
+    }
+    svg.onpointerout = function(e) {
+      const p = e.target.closest('path')
+      if (p) p.removeAttribute('opacity')
+    }
 
     // --- Add pin SVGs to states with services ---
     // Remove any previous pins
@@ -184,27 +198,22 @@ function DiscoverYourDestinations() {
 
     // Helper to add pins (used initially and after zoom)
     function addPins() {
-      // Remove old pins
       Array.from(svg.querySelectorAll('.state-pin')).forEach(pin => pin.remove())
       serviceStates.forEach((state, idx) => {
         const path = Array.from(svg.querySelectorAll('path')).find(p => p.dataset.name === state)
         if (!path) return
-        // Calculate centroid of the path
         const centroid = getPathCentroid(path)
         const cx = centroid.x
         const cy = centroid.y
         const color = pinColors[idx % pinColors.length]
-        // Use a <g> with transform for pin placement and scaling
         const vb = svg.viewBox.baseVal || { width: 100, height: 100 }
         const svgWidth = vb.width || 100
-        // Pin width as 6% of SVG width
         const pinWidth = svgWidth * 0.06
         const pinHeight = pinWidth * (21 / 14)
         const scale = pinWidth / 14
         const pinGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g')
         pinGroup.setAttribute('class', 'state-pin')
         pinGroup.setAttribute('pointer-events', 'none')
-        // Center the pin at (cx, cy) by translating and scaling
         pinGroup.setAttribute(
           'transform',
           `translate(${cx - pinWidth / 2},${cy - pinHeight}) scale(${scale})`
@@ -219,9 +228,11 @@ function DiscoverYourDestinations() {
     }
 
     addPins()
+    svg._addPins = addPins
 
-    // Patch zoomBy, zoomIn, zoomOut, animateViewBox, and resetZoom to re-add pins after zoom/pan
-    svg._addPins = addPins // attach for use in other functions
+    // --- Optimized pin redraw during zoom ---
+    // Only redraw pins every N frames during zoom animation
+    svg._pinRedrawFrame = 0
   }
 
   function normalizeStateName(raw) {
@@ -321,12 +332,19 @@ function DiscoverYourDestinations() {
         h: startVB.h + diff.h * ease,
       }
       setVB(next)
-      if (svg._addPins) svg._addPins() // <-- re-add pins after viewBox change
+      // Redraw pins every 4th frame for smoother performance
+      if (svg._addPins) {
+        svg._pinRedrawFrame = (svg._pinRedrawFrame || 0) + 1
+        if (svg._pinRedrawFrame % 4 === 0 || elapsed === 1) {
+          svg._addPins()
+        }
+      }
       if (elapsed < 1) {
         requestAnimationFrame(step)
       } else {
         setVB(target)
         if (svg._addPins) svg._addPins()
+        svg._pinRedrawFrame = 0
       }
     }
     requestAnimationFrame(step)

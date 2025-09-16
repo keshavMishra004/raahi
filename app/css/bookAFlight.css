@@ -38,3 +38,18 @@ line-height: normal;
 .book-button:active {
   transform: scale(0.9);
 }
+
+@media (max-width: 560px) {
+  .book-a-flight {
+    height: 50vh;
+    justify-content: center;
+    gap: 2em;
+  }
+  .book-heading {
+    font-size: 24px;
+  }
+  .book-button {
+    padding: 16px 24px;
+    font-size: 16px;
+  }
+}
