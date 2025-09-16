@@ -79,7 +79,8 @@
 @media(max-width: 768px) {
   .featured-container {
     flex-direction: column-reverse;
-    gap: 3px;
+    gap: 0.5em;
+    margin-bottom: 2em;
   }
   .featured-options {
     flex-direction: row;
@@ -96,6 +97,7 @@
   .featured-frame {
     width: 100%;
     height: 60vh;
+    padding: 0 1em;
   }
   .featured-services h2 {
     margin: 2rem 1rem 1rem 1rem;
@@ -109,6 +111,6 @@
     font-size: 14px;
     padding: 0;
     border-radius: 10px;
-    width: 25%;
+    width: 7.11em;
   }
 }
