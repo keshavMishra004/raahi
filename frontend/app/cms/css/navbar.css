@@ -1,0 +1,57 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #a0a0a0;
+  height: 46px;
+  width: 100%;
+  padding: 0 16px;
+  font-family: Arial, sans-serif;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  font-weight: bold;
+  color: #222;
+  font-size: 18px;
+  margin-right: 24px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.navbar-bell {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.navbar-company {
+  color: #222;
+  font-size: 14px;
+  text-align: right;
+  margin-right: 8px;
+  line-height: 1.1;
+}
+
+.navbar-operator {
+  font-size: 12px;
+  color: #444;
+}
+
+.navbar-avatar {
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e0e0e0;
+  width: 28px;
+  height: 28px;
+}
