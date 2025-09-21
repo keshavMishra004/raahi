@@ -1,4 +1,4 @@
-import { login, signup } from "../controllers/user.controller";
+import { login, signup } from "../controllers/user.controller.js";
 
 function userRoutes(app) {
     app.post("/user/signup", signup);
