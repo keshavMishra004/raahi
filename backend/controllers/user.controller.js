@@ -1,5 +1,5 @@
-import User from "../models/user.model"
-import bcrypt from "bcryptjs";
+import User from "../models/user.model.js"
+import bcrypt from "bcrypt";
 
 //signup
 
