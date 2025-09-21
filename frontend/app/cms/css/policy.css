@@ -1,0 +1,165 @@
+.policy-container {
+  margin: 2em 4em;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 32px 32px 24px 32px;
+}
+
+.policy-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #222;
+}
+
+.policy-desc {
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+.policy-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.policy-tab-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #222;
+  padding: 8px 24px;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-bottom 0.2s;
+}
+
+.policy-tab-btn.active {
+  color: #1976d2;
+  border-bottom: 2px solid #1976d2;
+  background: #f8fafc;
+}
+
+.policy-tab-content {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 24px;
+  min-height: 320px;
+}
+
+.policy-panel h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.policy-row {
+  margin-bottom: 18px;
+}
+
+.policy-row label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #222;
+}
+
+.policy-row select,
+.policy-row textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  background: #fff;
+}
+
+.policy-save-btn {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.policy-faq-list {
+  margin-bottom: 12px;
+}
+
+.policy-faq-item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.policy-faq-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #888;
+  cursor: pointer;
+}
+
+.policy-faq-add {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.policy-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.policy-review-item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.policy-review-service {
+  color: #1976d2;
+  margin-left: 4px;
+}
+
+.policy-review-date {
+  float: right;
+  color: #64748b;
+  font-size: 0.95em;
+}
+
+.policy-review-rating {
+  color: #fbbf24;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.policy-review-reply {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 6px;
+  padding: 0;
+}
