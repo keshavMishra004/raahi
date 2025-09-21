@@ -1,23 +1,24 @@
 import mongoose from "mongoose";
 
 const operatorSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
         required: true
     },
+    name: {
+        type: String
+    },
     phone: {
         type: Number
     },
     operatorCode: {
-        type: String
+        type: String,
+        unique: true
     }
 }, { timestamps: true });
 
