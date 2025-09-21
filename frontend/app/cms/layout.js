@@ -1,20 +1,22 @@
 "use client";
 
+import { usePathname } from 'next/navigation';
 import Navbar from "./components/Nav.js";
 import Sidebar from "./components/Sidebar.js";
 import './css/layout.css'
 
 export default function CmsLayout({ children }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/cms/login';
+
   return (
     <div className="layout">
-      {/* Sidebar always visible */}
-      <Navbar />
+      {/* Conditionally render the sidebar */}
+      {!isLoginPage && <Navbar />}
 
       <div className="main">
-        {/* Optional top navbar */}
-        <Sidebar />
+        {!isLoginPage && <Sidebar />}
 
-        {/* Page-specific content */}
         <main className="mainpage">
           {children}
         </main>

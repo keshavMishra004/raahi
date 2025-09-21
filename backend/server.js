@@ -13,7 +13,7 @@ app.listen(PORT, () => {
 app.use(cors());
 app.use(express.json());
 
-operatorRoutes(app);
+operatorRoutes(app); // called Operator Routes
 
 app.get('/', (req, res) => {
   res.send('Raahi API is running...');
