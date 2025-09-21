@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import 'dotenv/config';
 import operatorRoutes from './routes/operator.route.js';
+import userRoutes from './routes/user.route.js';
 
 const app = new express();
 const PORT = 5100;
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 operatorRoutes(app);
+userRoutes(app);
 
 app.get('/', (req, res) => {
   res.send('Raahi API is running...');
