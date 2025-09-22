@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -14,71 +16,57 @@ export default function SignupPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    setError("");
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  //   if (!form.fullname || !form.email || !form.password || !form.confirmPassword) {
-  //     setError("Please fill out all fields before continuing.");
-  //     return;
-  //   }
-  //   if (form.password !== form.confirmPassword) {
-  //     setError("password doesn't match!");
-  //     return;
-  //   }
-
-  //   setError("");
-  //   alert("✅ Account Created Successfully!");
-  // };
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  if (!form.fullname || !form.email || !form.password || !form.confirmPassword) {
-    setError("Please fill out all fields before continuing.");
-    return;
-  }
-  if (form.password !== form.confirmPassword) {
-    setError("password doesn't match!");
-    return;
-  }
-
-  // Send signup request to backend
-  try {
-    const res = await fetch("http://localhost:5100/api/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fullname: form.fullname,
-        email: form.email,
-        password: form.password,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || "Signup failed");
-    } else {
-      setError("");
-      alert("✅ Account Created Successfully!");
-      // Optionally redirect or clear form here
+    if (!form.fullname || !form.email || !form.password || !form.confirmPassword) {
+      toast.error("⚠️ Please fill out all fields before continuing.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
     }
-  } catch (err) {
-    setError("Network error. Please try again.");
-  }
-};
+
+    if (form.password !== form.confirmPassword) {
+      toast.error("Passwords do not match! 😵", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    toast.success("✅ Account Created Successfully!", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+
+    // Optionally clear form
+    setForm({
+      fullname: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+  };
 
   const handleGoogleLogin = () => {
-    alert("Google login clicked (connect OAuth here)");
+    toast.info("Google login clicked (connect OAuth here)", {
+      position: "top-right",
+      autoClose: 3000,
+    });
   };
 
   const handleFacebookLogin = () => {
-    alert("Facebook login clicked (connect OAuth here)");
+    toast.info("Facebook login clicked (connect OAuth here)", {
+      position: "top-right",
+      autoClose: 3000,
+    });
   };
 
   return (
@@ -153,11 +141,11 @@ export default function SignupPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y- right-3 flex items-center text-gray-500"
+              className="absolute inset-y-12.5 right-3 flex items-center text-gray-500"
               aria-label="Toggle Password"
               tabIndex={-1}
             >
-              {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+              {showPassword ? <EyeOff size={23} /> : <Eye size={23} />}
             </button>
           </div>
 
@@ -180,21 +168,13 @@ export default function SignupPage() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+              className="absolute inset-y-12.5 right-3 flex items-center text-gray-500"
               aria-label="Toggle Confirm Password"
               tabIndex={-1}
             >
-              {showConfirmPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+              {showConfirmPassword ? <EyeOff size={23} /> : <Eye size={23} />}
             </button>
           </div>
-
-          {/* Error box */}
-          {error && (
-            <div className="flex items-center justify-center gap-2 bg-red-50 text-red-600 border border-red-300 text-sm rounded-md px-3 py-2">
-              <span>❗</span>
-              <span>{error}</span>
-            </div>
-          )}
 
           {/* Submit */}
           <button
@@ -244,6 +224,9 @@ export default function SignupPage() {
           </Link>
         </p>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer />
     </div>
   );
 }
