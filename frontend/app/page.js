@@ -10,6 +10,7 @@ import NeedAHelp from "./Component/homepage/NeedAHelp.js";
 import BookAFlight from "./Component/homepage/BookAFlight.js";
 import DiscoverYourDestinations from "./Component/homepage/DiscoverYourDestinations.js";
 import NewsLetter from "./Component/homepage/NewsLetter.js";
+import Link from "next/link";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -53,7 +54,9 @@ export default function Home() {
         <div className="flex items-center gap-4 text-lg">
           <Moon className="cursor-pointer hover:scale-110 transition-transform" />
           <Heart className="cursor-pointer hover:scale-110 transition-transform" />
-          <User className="cursor-pointer hover:scale-110 transition-transform" />
+          <Link href="/signup">
+              <User className="cursor-pointer hover:scale-110 transition-transform" />
+          </Link>
         </div>
       </nav>
 
