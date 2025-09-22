@@ -26,7 +26,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
+        localStorage.removeItem("token"); // cms, user, admin
         window.location.href = "/cms/login";
       }
     }

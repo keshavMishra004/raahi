@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import api from '../../utils/axios'
+import api from '../../../utils/axios'
 import { useCmsAuth } from "@/app/context/CmsAuthContext"
 import { useRouter } from 'next/navigation'
 
