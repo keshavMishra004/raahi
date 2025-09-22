@@ -1,10 +1,8 @@
-import User from "../models/user.model"
-import bcrypt from "bcryptjs";
+import User from "../models/user.model.js"
+import bcrypt from "bcrypt";
 
 //signup
-
 export async function signup(req, res) {
-
   try {
     const { fullname, email, password } = req.body;
 
@@ -23,7 +21,7 @@ export async function signup(req, res) {
         password: hashedPassword,
     });
                                         
-  res.status(201).json({ message: "User created", userId: user._id });
+    res.status(201).json({ message: "User created", userId: user._id });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: "Server Error" });
@@ -32,9 +30,7 @@ export async function signup(req, res) {
 }
 
 //login 
-
 export async function login(req, res) {
-
   try {
     const { email, password } = req.body;
 

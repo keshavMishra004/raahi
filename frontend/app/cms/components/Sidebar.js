@@ -1,18 +1,27 @@
 "use client"
-import Link from 'next/link.js'
+import Link from 'next/link' // fixed: was 'next/link.js'
 import React from 'react'
 import '../css/sidebar.css'
+import { useCmsAuth } from "@/app/context/CmsAuthContext"
 
 function Sidebar() {
+  const { logout } = useCmsAuth();
+
   return (
     <section className='sidebar'>
         <Link href='/cms/'>Dashboard</Link>
-        <Link href=''>Company Info</Link>
-        <Link href=''>A/C Management</Link>
-        <Link href=''>Services</Link>
-        <Link href=''>Pricing</Link>
-        <Link href=''>Bookings</Link>
+        <Link href='#'>Company Info</Link> {/* was empty href */}
+        <Link href='#'>A/C Management</Link> {/* was empty href */}
+        <Link href='#'>Services</Link> {/* was empty href */}
+        <Link href='#'>Pricing</Link> {/* was empty href */}
+        <Link href='#'>Bookings</Link> {/* was empty href */}
         <Link href='/cms/policy'>Policy/FAQ/Reviews</Link>
+        <span
+          onClick={logout}
+          className="mt-4 w-full block text-left text-red-600 hover:underline cursor-pointer"
+        >
+          Logout
+        </span>
     </section>
   )
 }

@@ -1,6 +1,8 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import '../css/policy.css'
+import { useCmsAuth } from "@/app/context/CmsAuthContext"
+import { useRouter } from 'next/navigation'
 
 const TABS = [
   { key: 'policy', label: 'Policies' },
@@ -19,8 +21,18 @@ const SERVICES = [
 ]
 
 function Page() {
+  const { token, loading } = useCmsAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('policy')
   const [selectedService, setSelectedService] = useState(SERVICES[0])
+
+  useEffect(() => {
+    if (!loading && !token) {
+      router.replace("/cms/login");
+    }
+  }, [token, loading, router]);
+
+  if (loading || !token) return null;
 
   return (
     <div className="policy-container">

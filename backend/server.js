@@ -11,7 +11,12 @@ app.listen(PORT, () => {
     console.log(`server is running at port: ${PORT}`);
 });
 
-app.use(cors());
+// Update CORS middleware
+app.use(cors({
+  origin: "http://localhost:3000", // your frontend URL
+  credentials: true
+}));
+
 app.use(express.json());
 
 operatorRoutes(app);
