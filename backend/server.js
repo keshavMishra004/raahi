@@ -4,6 +4,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import operatorRoutes from './routes/operator.route.js';
 import userRoutes from './routes/user.route.js';
+import policyRoute from './routes/policy.route.js';
 
 const app = new express();
 const PORT = 5100;
@@ -21,6 +22,7 @@ app.use(express.json());
 
 operatorRoutes(app);
 userRoutes(app);
+policyRoute(app);
 
 app.get('/', (req, res) => {
   res.send('Raahi API is running...');
