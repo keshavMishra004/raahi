@@ -37,12 +37,10 @@ function Page() {
 
   // FAQ tab state
   const [faqService, setFaqService] = useState(SERVICES[0].value)
-  const [faqList, setFaqList] = useState([
-    {
-      question: "What documents do I need to carry?",
-      answer: "Please carry a government-issued photo ID like Aadhaar or Passport."
-    }
-  ])
+  const [faqList, setFaqList] = useState([])
+  const [faqLoading, setFaqLoading] = useState(false)
+  const [faqError, setFaqError] = useState("")
+  const [faqSuccess, setFaqSuccess] = useState("")
 
   // Reviews tab state
   const [reviewsService, setReviewsService] = useState(SERVICES[0].value)
@@ -124,6 +122,69 @@ function Page() {
     setPolicyLoading(false)
   }
 
+  // Fetch FAQs when FAQ tab or service changes
+  useEffect(() => {
+    if (activeTab === "faq" && token) {
+      fetchFaqs(faqService)
+    }
+    // eslint-disable-next-line
+  }, [faqService, activeTab, token])
+
+  const fetchFaqs = async (service) => {
+    setFaqLoading(true)
+    setFaqError("")
+    setFaqSuccess("")
+    try {
+      const params = { service: service === null ? "" : service }
+      const res = await api.get("/cms/getFaq", { params })
+      if (res.data && Array.isArray(res.data.faqs)) {
+        setFaqList(res.data.faqs)
+      } else {
+        setFaqList([])
+        setFaqError("No FAQs found for this service. You can create some.")
+      }
+    } catch (err) {
+      setFaqList([])
+      if (err.response && err.response.status === 404) {
+        setFaqError("No FAQs found for this service. You can create some.")
+      } else {
+        setFaqError("Failed to fetch FAQs.")
+      }
+    }
+    setFaqLoading(false)
+  }
+
+  const handleFaqChange = (idx, field, value) => {
+    setFaqList(faqList.map((faq, i) =>
+      i === idx ? { ...faq, [field]: value } : faq
+    ))
+  }
+
+  const handleAddFaq = () => {
+    setFaqList([...faqList, { question: "", answer: "" }])
+  }
+
+  const handleRemoveFaq = (idx) => {
+    setFaqList(faqList.filter((_, i) => i !== idx))
+  }
+
+  const handleSaveFaqs = async () => {
+    setFaqLoading(true)
+    setFaqError("")
+    setFaqSuccess("")
+    try {
+      const payload = {
+        service: faqService, // ObjectId or null
+        faqs: faqList
+      }
+      await api.put("/cms/createOrUpdateFaq", payload)
+      setFaqSuccess("FAQs saved successfully ✅")
+    } catch (err) {
+      setFaqError("Failed to save FAQs ❌")
+    }
+    setFaqLoading(false)
+  }
+
   if (loading || !token) return null;
 
   return (
@@ -199,40 +260,64 @@ function Page() {
         {activeTab === 'faq' && (
           <div className="policy-panel">
             <h2>
-              Editing {faqService === "Global (Default)" ? "Global FAQ" : `${faqService} FAQ`}
+              Editing {faqService === null
+                ? "Global FAQ"
+                : `${SERVICES.find(s => s.value === faqService)?.label || faqService} FAQ`}
             </h2>
             <div className="policy-row">
               <label>Select Service to Customize</label>
               <select
-                value={faqService}
-                onChange={e => setFaqService(e.target.value)}
+                value={faqService === null ? "" : faqService}
+                onChange={e => setFaqService(e.target.value === "" ? null : e.target.value)}
               >
                 {SERVICES.map(service => (
-                  <option key={service.value} value={service.value}>{service.label}</option>
+                  <option key={service.label} value={service.value === null ? "" : service.value}>
+                    {service.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="policy-faq-list">
               {faqList.map((faq, idx) => (
                 <div className="policy-faq-item" key={idx}>
-                  <div>
-                    <strong>Question:</strong> {faq.question}
-                  </div>
-                  <div>
-                    <strong>Answer:</strong> {faq.answer}
-                  </div>
+                  <input
+                    type="text"
+                    className="w-full mb-2"
+                    placeholder="Question: e.g., What documents do I need to carry?"
+                    value={faq.question}
+                    onChange={e => handleFaqChange(idx, "question", e.target.value)}
+                    disabled={faqLoading}
+                  />
+                  <input
+                    type="text"
+                    className="w-full"
+                    placeholder="Answer: e.g., Please carry a government-issued photo ID like Aadhaar or Passport."
+                    value={faq.answer}
+                    onChange={e => handleFaqChange(idx, "answer", e.target.value)}
+                    disabled={faqLoading}
+                  />
                   <button
                     className="policy-faq-remove"
-                    onClick={() => setFaqList(faqList.filter((_, i) => i !== idx))}
+                    onClick={() => handleRemoveFaq(idx)}
+                    disabled={faqLoading}
                   >✕</button>
                 </div>
               ))}
             </div>
+            {faqError && <div style={{ color: "red", marginBottom: 8 }}>{faqError}</div>}
+            {faqSuccess && <div style={{ color: "green", marginBottom: 8 }}>{faqSuccess}</div>}
             <button
               className="policy-faq-add"
-              onClick={() => setFaqList([...faqList, { question: "", answer: "" }])}
+              onClick={handleAddFaq}
+              disabled={faqLoading}
             >Add Question</button>
-            <button className="policy-save-btn">Save FAQs</button>
+            <button
+              className="policy-save-btn"
+              onClick={handleSaveFaqs}
+              disabled={faqLoading}
+            >
+              {faqLoading ? "Saving..." : "Save FAQs"}
+            </button>
           </div>
         )}
 
