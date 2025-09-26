@@ -31,22 +31,29 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import 'dotenv/config';
-
 import operatorRoutes from './routes/operator.route.js';
 import userRoutes from './routes/user.route.js';
 import Message from './models/message.js'; // Message model
+import policyRoute from './routes/policy.route.js';
+import faqRoutes from './routes/faq.route.js';
+
 
 // Create app + HTTP server
 const app = express();
 const httpServer = createServer(app);
 
-// Middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000", // your frontend URL
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Routes
 operatorRoutes(app);
 userRoutes(app);
+policyRoute(app);
+faqRoutes(app);
 
 app.get('/', (req, res) => {
   res.send('Raahi API is running...');

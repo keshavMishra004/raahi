@@ -1,24 +1,29 @@
 "use client";
 
+import { usePathname } from 'next/navigation';
 import Navbar from "./components/Nav.js";
 import Sidebar from "./components/Sidebar.js";
 import './css/layout.css'
+import { CmsAuthProvider } from "@/app/context/CmsAuthContext";
 
 export default function CmsLayout({ children }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/cms/login';
+
   return (
-    <div className="layout">
-      {/* Sidebar always visible */}
-      <Navbar />
+    <CmsAuthProvider>
+      <div className="layout">
+        {/* Conditionally render the sidebar */}
+        {!isLoginPage && <Navbar />}
 
-      <div className="main">
-        {/* Optional top navbar */}
-        <Sidebar />
+        <div className="main">
+          {!isLoginPage && <Sidebar />}
 
-        {/* Page-specific content */}
-        <main className="mainpage">
-          {children}
-        </main>
+          <main className="mainpage">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </CmsAuthProvider>
   );
 }
