@@ -19,7 +19,8 @@ const operatorSchema = new mongoose.Schema({
     operatorCode: {
         type: String,
         unique: true
-    }
+    },
+    
 }, { timestamps: true });
 
 const OperatorModel = mongoose.model("Operator", operatorSchema);

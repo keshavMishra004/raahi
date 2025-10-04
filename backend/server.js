@@ -33,9 +33,12 @@ import { Server } from 'socket.io';
 import 'dotenv/config';
 import operatorRoutes from './routes/operator.route.js';
 import userRoutes from './routes/user.route.js';
-import Message from './models/message.js'; // Message model
+import Message from './models/message.model.js'; // Message model
 import policyRoute from './routes/policy.route.js';
 import faqRoutes from './routes/faq.route.js';
+import aircraftRoutes from './routes/aircraft.route.js';
+
+
 
 
 // Create app + HTTP server
@@ -54,6 +57,10 @@ operatorRoutes(app);
 userRoutes(app);
 policyRoute(app);
 faqRoutes(app);
+aircraftRoutes(app);
+
+
+app.use("/api/aircrafts", aircraftRoutes);
 
 app.get('/', (req, res) => {
   res.send('Raahi API is running...');
