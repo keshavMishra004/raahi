@@ -3,7 +3,7 @@ import Aircraft from "../models/aircraft.model.js";
 // Add new aircraft
 export const addAircraft = async (req, res) => {
   try {
-    // Parse numbers and validate required fields
+    // For multipart/form-data, fields are in req.body, file in req.file
     const {
       registration,
       model,
@@ -37,6 +37,18 @@ export const addAircraft = async (req, res) => {
     // If operatorId is available from auth, use it, else allow null for testing
     const operatorId = req.user?.id || null;
 
+    // Handle file (optional)
+    let dgcaCertificate = null;
+    if (req.file) {
+      dgcaCertificate = {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        buffer: req.file.buffer,
+        size: req.file.size
+      };
+      // You can save this to DB or to disk/cloud as needed
+    }
+
     const aircraft = new Aircraft({
       registration,
       model,
@@ -45,7 +57,8 @@ export const addAircraft = async (req, res) => {
       passengerCapacity: paxCap,
       base,
       status,
-      operatorId
+      operatorId,
+      // dgcaCertificate, // Uncomment if you add this field to your schema
     });
 
     await aircraft.save();
