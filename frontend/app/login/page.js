@@ -1,26 +1,46 @@
 "use client";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react"; // npm install lucide-react
+import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
+import userApi from "../../utils/userAxios";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Demo validation
-    if (!form.email.includes("@")) {
-      setError("Incorrect email!");
-    } else {
-      setError("");
-      alert("Logged in!");
+    setError("");
+    setLoading(true);
+
+    if (!form.email || !form.password) {
+      setError("Please enter both email and password.");
+      setLoading(false);
+      return;
     }
+
+    try {
+      const res = await userApi.post("/user/login", {
+        email: form.email,
+        password: form.password,
+      });
+      // Save token to localStorage
+      localStorage.setItem("user_token", res.data.token);
+      // Redirect to home/dashboard
+      window.location.href = "/";
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        "Login failed. Please try again.";
+      setError(msg);
+    }
+    setLoading(false);
   };
 
   return (
@@ -85,8 +105,9 @@ export default function LoginPage() {
           <button
             type="submit"
             className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-md"
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 

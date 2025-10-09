@@ -1,11 +1,11 @@
 "use client";
-
 import { useState } from "react";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import userApi from "../../utils/userAxios";
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -22,7 +22,7 @@ export default function SignupPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.fullname || !form.email || !form.password || !form.confirmPassword) {
@@ -41,18 +41,34 @@ export default function SignupPage() {
       return;
     }
 
-    toast.success("✅ Account Created Successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-    });
-
-    // Optionally clear form
-    setForm({
-      fullname: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
+    try {
+      const res = await userApi.post("/user/signup", {
+        fullname: form.fullname,
+        email: form.email,
+        password: form.password,
+      });
+      toast.success("✅ Account Created Successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1500);
+      setForm({
+        fullname: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        "Signup failed. Please try again.";
+      toast.error(msg, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
   };
 
   const handleGoogleLogin = () => {
