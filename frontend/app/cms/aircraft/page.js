@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import api from "@/utils/axios";
 import AddAircraftForm from "./AddAirCraftForm";
+import { Plane, Wrench, CheckCircle, XCircle } from "lucide-react";
 
 export default function AircraftPage() {
   const [aircrafts, setAircrafts] = useState([]);
@@ -14,46 +15,84 @@ export default function AircraftPage() {
 
   useEffect(() => { fetchAircrafts(); }, []);
 
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "in service": return "bg-green-100 text-green-700 border-green-300";
+      case "under maintenance": return "bg-yellow-100 text-yellow-700 border-yellow-300";
+      case "retired": return "bg-red-100 text-red-700 border-red-300";
+      default: return "bg-gray-100 text-gray-700 border-gray-300";
+    }
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Aircraft Fleet Management</h1>
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-100 p-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+          <Plane className="text-blue-600" size={30} /> Aircraft Fleet Management
+        </h1>
         <button 
           onClick={() => setShowForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          className="bg-blue-600 hover:bg-blue-700 transition-colors text-white px-5 py-2.5 rounded-xl shadow-md"
         >
-          Add New Aircraft
+          + Add New Aircraft
         </button>
       </div>
 
-      <table className="w-full border-collapse bg-white shadow-md">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-3 border">Registration</th>
-            <th className="p-3 border">Model</th>
-            <th className="p-3 border">Type</th>
-            <th className="p-3 border">Capacity</th>
-            <th className="p-3 border">Base</th>
-            <th className="p-3 border">Status</th>
-            <th className="p-3 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {aircrafts.map((air) => (
-            <tr key={air._id} className="text-center border-t">
-              <td className="p-3">{air.registration}</td>
-              <td className="p-3">{air.model}</td>
-              <td className="p-3">{air.type}</td>
-              <td className="p-3">{air.crewCapacity} Crew / {air.passengerCapacity} PAX</td>
-              <td className="p-3">{air.base}</td>
-              <td className="p-3">{air.status}</td>
-              <td className="p-3 text-blue-500 cursor-pointer">Manage</td>
+      <div className="overflow-x-auto rounded-2xl shadow-xl backdrop-blur bg-white/60 border border-blue-100">
+        <table className="w-full text-sm text-gray-700">
+          <thead className="bg-blue-100/80 text-gray-800 text-base">
+            <tr>
+              <th className="p-4 text-left">Registration</th>
+              <th className="p-4 text-left">Model</th>
+              <th className="p-4 text-left">Type</th>
+              <th className="p-4 text-left">Capacity</th>
+              <th className="p-4 text-left">Base</th>
+              <th className="p-4 text-left">Status</th>
+              <th className="p-4 text-center">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {aircrafts.map((air, index) => (
+              <tr 
+                key={air._id || index}
+                className="hover:bg-blue-50 transition duration-200 border-b border-blue-100"
+              >
+                <td className="p-4 font-semibold">{air.registration}</td>
+                <td className="p-4">{air.model}</td>
+                <td className="p-4">{air.type}</td>
+                <td className="p-4">{air.crewCapacity} Crew / {air.passengerCapacity} PAX</td>
+                <td className="p-4">{air.base}</td>
+                <td className="p-4">
+                  <span className={`px-3 py-1 rounded-full border text-xs font-medium ${getStatusColor(air.status)}`}>
+                    {air.status}
+                  </span>
+                </td>
+                <td className="p-4 text-center">
+                  <button className="text-blue-600 hover:text-blue-800 font-medium transition-all">
+                    Manage
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {aircrafts.length === 0 && (
+              <tr>
+                <td colSpan="7" className="p-6 text-center text-gray-500">
+                  No aircraft found. Add one to get started.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {showForm && <AddAircraftForm onClose={() => { setShowForm(false); fetchAircrafts(); }} />}
+      {showForm && (
+        <AddAircraftForm 
+          onClose={() => { 
+            setShowForm(false); 
+            fetchAircrafts(); 
+          }} 
+        />
+      )}
     </div>
   );
 }

@@ -38,9 +38,6 @@ import policyRoute from './routes/policy.route.js';
 import faqRoutes from './routes/faq.route.js';
 import aircraftRoutes from './routes/aircraft.route.js';
 
-
-
-
 // Create app + HTTP server
 const app = express();
 const httpServer = createServer(app);
