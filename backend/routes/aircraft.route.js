@@ -1,13 +1,17 @@
 import { addAircraft, getAircrafts, updateAircraft, deleteAircraft } from "../controllers/aircraft.controller.js";
 import multer from "multer";
 
+// Configure multer (memory storage for now)
 const upload = multer();
 
-// import { cmsAuth } from "../middlewares/cmsAuth.js";
+// Accept dgcaCertificate (single file) and photos (multiple files)
+const aircraftUpload = upload.fields([
+  { name: "dgcaCertificate", maxCount: 1 },
+  { name: "photos", maxCount: 10 },
+]);
 
-// For development, remove cmsAuth to avoid 401/403 errors
 function aircraftRoutes(app) {
-    app.post("/cms/aircraft", upload.single("dgcaCertificate"), addAircraft); // handle file upload
+    app.post("/cms/aircraft", aircraftUpload, addAircraft);
     app.get("/cms/aircrafts", getAircrafts);
     app.put("/cms/aircraft/:id", updateAircraft);
     app.delete("/cms/aircraft/:id", deleteAircraft);

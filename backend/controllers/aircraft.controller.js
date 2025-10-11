@@ -1,9 +1,13 @@
-import Aircraft from "../models/aircraft.model.js";
+import Aircraft from "../models/airCraft.model.js";
 
 // Add new aircraft
 export const addAircraft = async (req, res) => {
   try {
-    // For multipart/form-data, fields are in req.body, file in req.file
+    // Debug: log incoming data
+    // console.log("req.body:", req.body);
+    // console.log("req.file:", req.file);
+
+    // Defensive: handle empty strings and undefined
     const {
       registration,
       model,
@@ -15,22 +19,22 @@ export const addAircraft = async (req, res) => {
     } = req.body;
 
     if (
-      !registration ||
-      !model ||
-      !type ||
+      !registration?.trim() ||
+      !model?.trim() ||
+      !type?.trim() ||
       crewCapacity === undefined ||
       passengerCapacity === undefined ||
-      !base ||
-      !status
+      !base?.trim() ||
+      !status?.trim()
     ) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
-    // Parse numbers
+    // Parse numbers safely
     const crewCap = Number(crewCapacity);
     const paxCap = Number(passengerCapacity);
 
-    if (isNaN(crewCap) || isNaN(paxCap)) {
+    if (!crewCapacity || !passengerCapacity || isNaN(crewCap) || isNaN(paxCap)) {
       return res.status(400).json({ success: false, message: "Capacity fields must be numbers" });
     }
 
@@ -46,7 +50,7 @@ export const addAircraft = async (req, res) => {
         buffer: req.file.buffer,
         size: req.file.size
       };
-      // You can save this to DB or to disk/cloud as needed
+      // Save to DB or disk/cloud as needed
     }
 
     const aircraft = new Aircraft({
@@ -58,12 +62,13 @@ export const addAircraft = async (req, res) => {
       base,
       status,
       operatorId,
-      // dgcaCertificate, // Uncomment if you add this field to your schema
+      // dgcaCertificate,
     });
 
     await aircraft.save();
     res.status(201).json({ success: true, aircraft });
   } catch (error) {
+    console.error("Aircraft add error:", error); // Log error for debugging
     res.status(400).json({ success: false, message: error.message });
   }
 };
