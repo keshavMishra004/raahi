@@ -10,7 +10,7 @@ function Sidebar() {
   return (
     <section className='sidebar'>
         <Link href='/cms'>Dashboard</Link>
-        <Link href='#'>Company Info</Link> {/* was empty href */}
+        <Link href='/cms/company'>Company Info</Link> {/* was empty href */}
         <Link href='/cms/aircraft'>A/C Management</Link> {/* was empty href */}
         <Link href='#'>Services</Link> {/* was empty href */}
         <Link href='#'>Pricing</Link> {/* was empty href */}
