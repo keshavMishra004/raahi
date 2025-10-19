@@ -48,6 +48,8 @@ export default function AddAircraftForm({ onClose }) {
     shortDescription: "",
     detailedDescription: "",
     additionalNotes: "",
+    // Step 3 fields
+    services: [],
   });
   const [error, setError] = useState("");
 
@@ -116,7 +118,15 @@ export default function AddAircraftForm({ onClose }) {
     setStep(2);
   };
 
+  const handleStep2Next = () => {
+    setError("");
+    // Optional: validate required step 2 fields here
+    setStep(3);
+  };
+
   const handleStep2Back = () => setStep(1);
+
+  const handleStep3Back = () => setStep(2);
 
   const handleSubmit = async () => {
     setError("");
@@ -151,6 +161,8 @@ export default function AddAircraftForm({ onClose }) {
     }
   };
 
+  const progressWidth = step === 1 ? "33%" : step === 2 ? "66%" : "100%";
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-md z-50">
       <motion.div
@@ -168,12 +180,18 @@ export default function AddAircraftForm({ onClose }) {
             <Plane className="text-blue-600 dark:text-blue-400" size={28} />
             <div>
               <h2 className="text-xl font-semibold text-slate-800 dark:text-white">
-                {step === 1 ? "Add New Aircraft" : "Aircraft Specs & Details"}
+                {step === 1
+                  ? "Add New Aircraft"
+                  : step === 2
+                  ? "Aircraft Specs & Details"
+                  : "Assign Services"}
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-300">
                 {step === 1
                   ? "Fill in the details below to register a new aircraft."
-                  : "Enter technical specs, amenities, and upload photos."}
+                  : step === 2
+                  ? "Enter technical specs, amenities, and upload photos."
+                  : "Select all operational roles this aircraft is certified for."}
               </p>
             </div>
           </div>
@@ -189,7 +207,7 @@ export default function AddAircraftForm({ onClose }) {
         <div className="w-full h-1 bg-slate-200 dark:bg-slate-700">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: step === 1 ? "33%" : "100%" }}
+            animate={{ width: progressWidth }}
             transition={{ duration: 0.8 }}
             className="h-full bg-gradient-to-r from-blue-500 to-indigo-500"
           ></motion.div>
@@ -204,6 +222,7 @@ export default function AddAircraftForm({ onClose }) {
           )}
 
           {step === 1 ? (
+            // ...existing step 1 UI...
             <div className="grid grid-cols-2 gap-4">
               <FloatingInput
                 label="Registration No."
@@ -276,7 +295,8 @@ export default function AddAircraftForm({ onClose }) {
                 options={["In Service", "Under Maintenance", "Retired"]}
               />
             </div>
-          ) : (
+          ) : step === 2 ? (
+            // ...existing step 2 UI...
             <div className="space-y-6">
               {/* Identification & Certification */}
               <div>
@@ -504,22 +524,51 @@ export default function AddAircraftForm({ onClose }) {
                 </div>
               </div>
             </div>
+          ) : (
+            // Step 3: Assign Services
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {["Air Ambulance", "Private Charter", "Pilgrimage", "Udaan Flight", "Aerial Service"].map((service) => (
+                <label
+                  key={service}
+                  className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
+                    form.services.includes(service)
+                      ? "bg-blue-50 border-blue-300 text-blue-800"
+                      : "border-gray-200 text-gray-700"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-0"
+                    checked={form.services.includes(service)}
+                    onChange={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        services: prev.services.includes(service)
+                          ? prev.services.filter((s) => s !== service)
+                          : [...prev.services, service],
+                      }))
+                    }
+                  />
+                  <span className="text-base font-medium">{service}</span>
+                </label>
+              ))}
+            </div>
           )}
         </div>
 
         {/* Footer */}
         <div className="p-6 flex justify-end gap-3 border-t border-white/20">
-          {step === 2 && (
+          {step > 1 && (
             <button
-              onClick={handleStep2Back}
+              onClick={() => setStep(step - 1)}
               className="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 
-                       hover:bg-slate-100 dark:text-slate-300 dark:border-slate-600 
-                       dark:hover:bg-slate-800 transition"
+                       hover:bg-slate-100 transition"
             >
               ← Back
             </button>
           )}
-          {step === 1 ? (
+
+          {step === 1 && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
@@ -529,7 +578,21 @@ export default function AddAircraftForm({ onClose }) {
             >
               Next →
             </motion.button>
-          ) : (
+          )}
+
+          {step === 2 && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleStep2Next}
+              className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 
+                         text-white font-semibold shadow-md hover:shadow-lg transition"
+            >
+              Next →
+            </motion.button>
+          )}
+
+          {step === 3 && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
