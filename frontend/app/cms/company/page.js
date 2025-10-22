@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+// reuse the policy styles (classy, formal) — contains .policy-container, .policy-tabs, .policy-tab-btn, .policy-panel etc.
+import '../css/policy.css';
 import api from "../../../utils/axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -113,12 +115,187 @@ export default function CompanyPage() {
 		notesForAdmin: "",
 	});
 
+	// maintenance state (required by helpers and saveData)
+	const [maintenance, setMaintenance] = useState({
+		lastCheck: "",
+		nextDue: "",
+		statusNotes: "",
+		maintenanceRecords: []
+	});
+
 	// preview URL for selected logo file (was missing; required by useEffect and UI)
 	const [logoPreview, setLogoPreview] = useState(null);
 
 	// Add predefined certifications options and selected state
 	const CERT_OPTIONS = ["IATA", "DGCA", "FAA", "ISO", "Other"];
 	const [certificationsSelected, setCertificationsSelected] = useState([]);
+
+	// loading profile (so returned visits populate fields)
+	const [loadingProfile, setLoadingProfile] = useState(true);
+
+	// fetch operator profile on mount and populate form state
+	useEffect(() => {
+		let mounted = true;
+		const load = async () => {
+			try {
+				setLoadingProfile(true);
+				const res = await api.get("/operator");
+				const data = res.data;
+				if (!data || !mounted) return;
+
+				// company
+				if (data.company) {
+					const comp = {
+						companyName: data.company.companyName || "",
+						brandName: data.company.brandName || "",
+						description: data.company.description || "",
+						yearEstablished: data.company.yearEstablished || "",
+						logo: null
+					};
+					// backend may store logo metadata or legacy URL
+					if (data.company.logo && (data.company.logo.originalName || data.company.logo.fileUrl)) {
+						comp.logo = { name: data.company.logo.originalName || "", fileUrl: data.company.logo.fileUrl || "" };
+						if (data.company.logo.fileUrl) setLogoPreview(data.company.logo.fileUrl);
+					} else if (data.company.logoUrl) {
+						comp.logo = data.company.logoUrl;
+						setLogoPreview(data.company.logoUrl);
+					}
+					setCompany(comp);
+				}
+
+				// location
+				if (data.location) {
+					setLocation({
+						headquartersAddress: data.location.headquartersAddress || "",
+						branches: Array.isArray(data.location.branches) ? data.location.branches : [],
+						city: data.location.city || "",
+						state: data.location.state || "",
+						country: data.location.country || "",
+						postalCode: data.location.postalCode || "",
+						locationLink: data.location.locationLink || ""
+					});
+				}
+
+				// contactInfo
+				if (data.contactInfo) {
+					setContactInfo({
+						primaryContactName: data.contactInfo.primaryContactName || "",
+						designation: data.contactInfo.designation || "",
+						officePhone: data.contactInfo.officePhone || "",
+						mobileNumber: data.contactInfo.mobileNumber || "",
+						email: data.contactInfo.email || "",
+						website: data.contactInfo.website || "",
+						customerSupportContact: data.contactInfo.customerSupportContact || ""
+					});
+				}
+
+				// businessInfo
+				if (data.businessInfo) {
+					setBusinessInfo({
+						registrationNumber: data.businessInfo.registrationNumber || "",
+						taxId: data.businessInfo.taxId || "",
+						countryOfIncorporation: data.businessInfo.countryOfIncorporation || "",
+						businessType: data.businessInfo.businessType || "Private Limited",
+						businessLicenses: Array.isArray(data.businessInfo.businessLicenses) ? data.businessInfo.businessLicenses : []
+					});
+				}
+
+				// insurance -> map structured coverages to flat UI flags
+				if (data.insurance) {
+					setInsurance({
+						provider: data.insurance.provider || "",
+						policyNumber: data.insurance.policyNumber || "",
+						validFrom: data.insurance.validFrom ? String(data.insurance.validFrom).slice(0, 10) : "",
+						validTo: data.insurance.validTo ? String(data.insurance.validTo).slice(0, 10) : "",
+						hasAircraftInsurance: !!data.insurance.coverages?.aircraft?.enabled,
+						hasThirdPartyInsurance: !!data.insurance.coverages?.thirdParty?.enabled,
+						hasPatientLiabilityInsurance: !!data.insurance.coverages?.patientLiability?.enabled,
+						policyAircraftNumber: data.insurance.coverages?.aircraft?.policyNumber || "",
+						policyThirdPartyNumber: data.insurance.coverages?.thirdParty?.policyNumber || "",
+						policyPatientLiabilityNumber: data.insurance.coverages?.patientLiability?.policyNumber || ""
+					});
+				}
+
+				// regulatory
+				if (data.regulatory) {
+					setRegulatory({
+						dgcaAirAmbulanceApproval: !!data.regulatory.dgcaAirAmbulanceApproval,
+						nsopNumber: data.regulatory.nsopNumber || "",
+						airworthinessCertificateValidity: data.regulatory.airworthinessCertificateValidity ? String(data.regulatory.airworthinessCertificateValidity).slice(0,10) : "",
+						maintenanceOrganizationApproval: data.regulatory.maintenanceOrganizationApproval || "",
+						safetyManagementSystem: !!data.regulatory.safetyManagementSystem,
+						emergencyEquipment: Array.isArray(data.regulatory.emergencyEquipment) ? data.regulatory.emergencyEquipment.join(", ") : (data.regulatory.emergencyEquipment || "")
+					});
+				}
+
+				// maintenance
+				if (data.maintenance) {
+					setMaintenance({
+						lastCheck: data.maintenance.lastCheck ? String(data.maintenance.lastCheck).slice(0,10) : "",
+						nextDue: data.maintenance.nextDue ? String(data.maintenance.nextDue).slice(0,10) : "",
+						statusNotes: data.maintenance.statusNotes || "",
+						maintenanceRecords: Array.isArray(data.maintenance.maintenanceRecords) ? data.maintenance.maintenanceRecords : []
+					});
+				}
+
+				// finance
+				if (data.finance) {
+					setFinance({
+						bankName: data.finance.bankName || "",
+						branchAddress: data.finance.branchAddress || "",
+						accountNumber: data.finance.accountNumber || "",
+						swiftIfsc: data.finance.swiftIfsc || "",
+						paymentMethodsAccepted: Array.isArray(data.finance.paymentMethodsAccepted) ? data.finance.paymentMethodsAccepted : [],
+						accountHolderName: data.finance.accountHolderName || "",
+						billingAddress: data.finance.billingAddress || ""
+					});
+				}
+
+				// documents: map backend FileMeta -> {name, fileUrl, ...}
+				if (data.documents) {
+					const mapped = {};
+					const keys = Object.keys(documents);
+					for (const k of keys) {
+						const arr = data.documents[k] || [];
+						mapped[k] = arr.map((f) => ({ name: f.originalName || f.fileUrl || "", fileUrl: f.fileUrl || "", mimeType: f.mimeType || "", size: f.size || 0 }));
+					}
+					setDocuments((p) => ({ ...p, ...mapped }));
+				}
+
+				// pressReleases
+				if (Array.isArray(data.pressReleases)) {
+					setPressReleases(data.pressReleases.map(p => ({ name: p.originalName || p.fileUrl || "", fileUrl: p.fileUrl || "", title: p.title || "" })));
+				}
+
+				// extras
+				if (data.extras) {
+					setExtras(data.extras);
+				} else {
+					setExtras({
+						socialMedia: {
+							facebook: data.socialMedia?.facebook || "",
+							instagram: data.socialMedia?.instagram || "",
+							twitter: data.socialMedia?.twitter || "",
+							linkedin: data.socialMedia?.linkedin || "",
+							youtube: data.socialMedia?.youtube || "",
+							other: Array.isArray(data.socialMedia?.other) ? data.socialMedia.other : []
+						},
+						testimonials: Array.isArray(data.testimonials) ? data.testimonials : [],
+						pastExperience: data.pastExperience || "",
+						preferredCommunicationChannel: data.preferredCommunicationChannel || "whatsapp",
+						notesForAdmin: data.notesForAdmin || ""
+					});
+				}
+			} catch (err) {
+				console.warn("Failed to fetch operator profile", err);
+			} finally {
+				setLoadingProfile(false);
+			}
+		};
+		load();
+		return () => { mounted = false; };
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	// ---------------- Helpers ----------------
 	const updateCompany = (field, value) => setCompany((p) => ({ ...p, [field]: value }));
@@ -147,17 +324,61 @@ export default function CompanyPage() {
 	const updateMaintenanceRecord = (idx, field, value) => setMaintenance((p) => { const arr = [...p.maintenanceRecords]; arr[idx] = { ...arr[idx], [field]: value }; return { ...p, maintenanceRecords: arr }; });
 	const removeMaintenanceRecord = (idx) => setMaintenance((p) => ({ ...p, maintenanceRecords: p.maintenanceRecords.filter((_, i) => i !== idx) }));
 
-	// documents helpers (file inputs kept client-side)
-	const handleFileChange = (groupKey, files) => {
-		const list = Array.from(files).map((f) => ({ name: f.name, size: f.size, type: f.type, file: f }));
-		setDocuments((p) => ({ ...p, [groupKey]: [...p[groupKey], ...list] }));
+	// documents helpers (upload files to backend)
+	// Upload files to backend; groupKey: e.g., "businessLicenses" or "logo" (for company logo)
+	const uploadFiles = async (groupKey, files) => {
+		if (!files || files.length === 0) return;
+		const form = new FormData();
+		form.append("group", groupKey);
+		for (const f of Array.from(files)) form.append("files", f);
+		try {
+			const res = await api.post("/operator/upload", form, { headers: { "Content-Type": "multipart/form-data" } });
+			const returned = res.data?.files || [];
+			// handle logo separately
+			if (groupKey === "logo" || groupKey === "companyLogo") {
+				const meta = returned[0];
+				if (meta) {
+					setCompany((p) => ({ ...p, logo: { name: meta.originalName || "", fileUrl: meta.fileUrl } }));
+					setLogoPreview(meta.fileUrl || null);
+				}
+				return;
+			}
+			// normalize returned entries to frontend documents shape
+			const mapped = returned.map((f) => ({ name: f.originalName || f.fileUrl || "", fileUrl: f.fileUrl || "", mimeType: f.mimeType, size: f.size }));
+			setDocuments((p) => ({ ...p, [groupKey]: [...p[groupKey], ...mapped] }));
+		} catch (err) {
+			toast.error("File upload failed", { position: "top-right" });
+			console.error("uploadFiles error", err);
+		}
 	};
+
+	const handleFileChange = (groupKey, files) => uploadFiles(groupKey, files);
+
+	// delete uploaded file (by fileUrl) and remove from state
+	const deleteUploadedDocument = async (groupKey, fileUrl) => {
+		try {
+			await api.delete("/operator/document", { data: { group: groupKey, fileUrl } });
+			// remove from state
+			if (groupKey === "logo" || groupKey === "companyLogo") {
+				setCompany((p) => ({ ...p, logo: null }));
+				setLogoPreview(null);
+				return;
+			}
+			setDocuments((p) => ({ ...p, [groupKey]: p[groupKey].filter((f) => f.fileUrl !== fileUrl) }));
+		} catch (err) {
+			toast.error("Failed to delete file", { position: "top-right" });
+			console.error("deleteUploadedDocument error", err);
+		}
+	};
+
+	// removeDocument kept for removing unsaved local files (if any)
 	const removeDocument = (groupKey, index) => setDocuments((p) => { const arr = [...p[groupKey]]; arr.splice(index, 1); return { ...p, [groupKey]: arr }; });
 
 	// attachments/promotional/press helpers
-	const handleGenericFile = (setter, prevList, files) => {
-		const list = Array.from(files).map((f) => ({ name: f.name, file: f }));
-		setter([...prevList, ...list]);
+	// For press releases we also upload
+	const handleGenericFile = (setter, prevList, files, groupName = "pressReleases") => {
+		// upload to backend and append returned metadata
+		uploadFiles(groupName, files);
 	};
 	const removeGenericFile = (setter, list, idx) => setter(list.filter((_, i) => i !== idx));
 
@@ -176,22 +397,27 @@ export default function CompanyPage() {
 	};
 	const updateFinance = (field, value) => setFinance((p) => ({ ...p, [field]: value }));
 
-	// helper for logo file: set file in state and create preview URL
+	// helper for logo file: set file in state, show local preview and upload immediately
 	const handleLogoFile = (file) => {
-		// set file in company state
 		setCompany((p) => ({ ...p, logo: file || null }));
 
-		// revoke old preview URL if present
+		// cleanup old preview
 		setLogoPreview((prev) => {
-			if (prev) URL.revokeObjectURL(prev);
+			if (prev && typeof prev === "string" && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
 			return null;
 		});
 
-		// create new preview URL when a file is selected
-		if (file) {
-			const url = URL.createObjectURL(file);
-			setLogoPreview(url);
+		if (!file) {
+			setLogoPreview(null);
+			return;
 		}
+
+		// local preview immediately
+		const url = URL.createObjectURL(file);
+		setLogoPreview(url);
+
+		// upload to backend (uploadFiles will update state with server fileUrl when returned)
+		uploadFiles("logo", [file]);
 	};
 
 	// cleanup object URL on unmount
@@ -251,10 +477,15 @@ export default function CompanyPage() {
 	};
 
 	// ---------------- UI per tab ----------------
+	// Policy-style panel: cleaner, rounded, subtle shadow, formal header
 	const card = (title, children) => (
-		<div className="bg-white border rounded-lg p-4 shadow-sm">
-			<h3 className="text-lg font-medium mb-3">{title}</h3>
-			<div className="space-y-3">{children}</div>
+		<div className="policy-panel">
+			<div className="policy-panel-head">
+				<h3 className="text-xl font-semibold text-[#054972]">{title}</h3>
+			</div>
+			<div className="policy-panel-body">
+				{children}
+			</div>
 		</div>
 	);
 
@@ -490,7 +721,11 @@ export default function CompanyPage() {
 										{documents.businessLicenses.map((f, i) => (
 											<li key={i} className="flex items-center gap-3">
 												<span className="truncate max-w-[60%]">{f.name}</span>
-												<button type="button" onClick={() => removeDocument("businessLicenses", i)} className="text-red-500 text-xs cursor-pointer">Remove</button>
+												{f.fileUrl ? (
+													<button type="button" onClick={() => deleteUploadedDocument("businessLicenses", f.fileUrl)} className="text-red-500 text-xs cursor-pointer">Remove</button>
+												) : (
+													<button type="button" onClick={() => removeDocument("businessLicenses", i)} className="text-red-500 text-xs cursor-pointer">Remove</button>
+												)}
 											</li>
 										))}
 									</ul>
@@ -620,40 +855,45 @@ export default function CompanyPage() {
 		<div className="space-y-4">
 			{card("Upload Documents", (
 				<>
-					{[
-						{ key: "businessLicenses", label: "Business Licenses" },
-						{ key: "taxCertificates", label: "Tax Certificates" },
-						{ key: "insuranceCertificates", label: "Insurance Certificates" },
-						{ key: "identityProofs", label: "Identity Proofs" },
-						{ key: "addressProofs", label: "Address Proofs" },
-						{ key: "religiousApprovals", label: "Religious Approvals" },
-						{ key: "nsopAopCertificates", label: "NSOP / AOP Certificates" },
-						{ key: "dgcaComplianceDocs", label: "DGCA Compliance Docs" },
-					].map((d) => (
-						<div key={d.key} className="flex items-start gap-4">
-							<div className="w-48">
-								<label className="block text-sm font-medium text-gray-700">{d.label}</label>
-								<input
-									type="file"
-									multiple
-									onChange={(e) => handleFileChange(d.key, e.target.files)}
-									className="mt-2 w-full rounded-md border px-3 py-2 bg-white cursor-pointer"
-								/>
+					{
+						[
+							{ key: "businessLicenses", label: "Business Licenses" },
+							{ key: "taxCertificates", label: "Tax Certificates" },
+							{ key: "insuranceCertificates", label: "Insurance Certificates" },
+							{ key: "identityProofs", label: "Identity Proofs" },
+							{ key: "addressProofs", label: "Address Proofs" },
+							{ key: "religiousApprovals", label: "Religious Approvals" },
+							{ key: "nsopAopCertificates", label: "NSOP / AOP Certificates" },
+							{ key: "dgcaComplianceDocs", label: "DGCA Compliance Docs" },
+						].map((d) => (
+							<div key={d.key} className="flex items-start gap-4">
+								<div className="w-48">
+									<label className="block text-sm font-medium text-gray-700">{d.label}</label>
+									<input
+										type="file"
+										multiple
+										onChange={(e) => handleFileChange(d.key, e.target.files)}
+										className="mt-2 w-full rounded-md border px-3 py-2 bg-white cursor-pointer"
+									/>
+								</div>
+								<div className="flex-1 text-sm text-gray-600">
+									{documents[d.key].length > 0 ? (
+										<ul className="list-disc ml-5">
+											{documents[d.key].map((f, i) => (
+												<li key={i} className="flex items-center gap-3">
+													<span className="truncate max-w-[60%]">{f.name}</span>
+													{f.fileUrl ? (
+														<button type="button" onClick={() => deleteUploadedDocument(d.key, f.fileUrl)} className="text-red-500 text-xs cursor-pointer">Remove</button>
+													) : (
+														<button type="button" onClick={() => removeDocument(d.key, i)} className="text-red-500 text-xs cursor-pointer">Remove</button>
+													)}
+												</li>
+											))}
+										</ul>
+									) : <span className="text-gray-400">No files selected</span>}
+								</div>
 							</div>
-							<div className="flex-1 text-sm text-gray-600">
-								{documents[d.key].length > 0 ? (
-									<ul className="list-disc ml-5">
-										{documents[d.key].map((f, i) => (
-											<li key={i} className="flex items-center gap-3">
-												<span className="truncate max-w-[60%]">{f.name}</span>
-												<button type="button" onClick={() => removeDocument(d.key, i)} className="text-red-500 text-xs cursor-pointer">Remove</button>
-											</li>
-										))}
-									</ul>
-								) : <span className="text-gray-400">No files selected</span>}
-							</div>
-						</div>
-					))}
+						))}
 				</>
 			))}
 		</div>
@@ -749,37 +989,49 @@ export default function CompanyPage() {
 
 	// ---------------- Render ----------------
 	return (
-		<div className="p-6 max-w-6xl mx-auto">
-			<h1 className="text-2xl font-bold mb-4">Company — CMS</h1>
+		<div className="policy-container py-8 px-6">
+			<div className="max-w-6xl mx-auto">
+				<h1 className="policy-title">Company — CMS</h1>
+				<p className="policy-desc mb-6">Manage company profile, legal information, finance and documents in a formal, consistent interface.</p>
 
-			<div className="flex gap-3 mb-6 flex-wrap">
-				{TABS.map((t, i) => (
-					<button
-						key={t}
-						onClick={() => setActiveTab(i)}
-						className={`px-4 py-2 rounded-full border cursor-pointer ${activeTab === i ? "bg-yellow-50 border-yellow-400 font-semibold" : "bg-white border-gray-200"}`}
-					>
-						{t}
-					</button>
-				))}
-			</div>
-
-			<div className="bg-gray-50 p-6 rounded-lg shadow-sm border">
-				<div className="min-h-[420px]">
-					{activeTab === 0 && renderCompanyTab()}
-					{activeTab === 1 && renderLegalTab()}
-					{activeTab === 2 && renderFinanceTab()}
-					{activeTab === 3 && renderDocumentsTab()}
-					{activeTab === 4 && renderExtrasTab()}
+				<div className="policy-tabs mb-6">
+					{TABS.map((t, i) => (
+						<button
+							key={t}
+							onClick={() => setActiveTab(i)}
+							className={`policy-tab-btn ${activeTab === i ? 'active' : ''}`}
+							aria-pressed={activeTab === i}
+						>
+							{t}
+						</button>
+					))}
 				</div>
 
-				<div className="mt-6 flex items-center justify-end gap-3">
-					<button onClick={() => saveData(false)} disabled={saving} className="px-4 py-2 rounded-md bg-white border hover:bg-gray-100 cursor-pointer">
-						{saving ? "Saving..." : "Save"}
-					</button>
-					<button onClick={() => saveData(true)} disabled={saving} className="px-4 py-2 rounded-md bg-[#ff6c2d] text-white hover:bg-[#ff5a0a] cursor-pointer">
-						{saving ? "Saving..." : "Save and Next"}
-					</button>
+				<div className="policy-content bg-white/95 rounded-2xl shadow-md border p-6">
+					<div className="min-h-[420px]">
+						{activeTab === 0 && renderCompanyTab()}
+						{activeTab === 1 && renderLegalTab()}
+						{activeTab === 2 && renderFinanceTab()}
+						{activeTab === 3 && renderDocumentsTab()}
+						{activeTab === 4 && renderExtrasTab()}
+					</div>
+
+					<div className="mt-6 flex items-center justify-end gap-3">
+						<button
+							onClick={() => saveData(false)}
+							disabled={saving}
+							className="px-5 py-2 rounded-md bg-[#054972] text-white hover:bg-[#033d52] disabled:opacity-60"
+						>
+							{saving ? "Saving..." : "Save"}
+						</button>
+						<button
+							onClick={() => saveData(true)}
+							disabled={saving}
+							className="px-5 py-2 rounded-md bg-[#ff6c2d] text-white hover:bg-[#ff5a0a] disabled:opacity-60"
+						>
+							{saving ? "Saving..." : "Save and Next"}
+						</button>
+					</div>
 				</div>
 			</div>
 
