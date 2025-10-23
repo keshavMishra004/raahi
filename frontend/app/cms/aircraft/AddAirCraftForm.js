@@ -50,6 +50,12 @@ export default function AddAircraftForm({ onClose }) {
     additionalNotes: "",
     // Step 3 fields
     services: [],
+    // Step 4 fields
+    seatConfig: {
+      totalRows: 0,
+      seatPattern: "",
+      seats: [], // [{row: 1, col: 'A', type: 'standard'|'business'|...}]
+    },
   });
   const [error, setError] = useState("");
 
@@ -128,6 +134,95 @@ export default function AddAircraftForm({ onClose }) {
 
   const handleStep3Back = () => setStep(2);
 
+  // --- SEAT LAYOUT LOGIC ---
+  const [seatRows, setSeatRows] = useState(""); // for UI input
+  const [seatPattern, setSeatPattern] = useState(""); // for UI input
+  const [seatLayout, setSeatLayout] = useState([]); // 2D array for UI
+  const [selectedSeatTool, setSelectedSeatTool] = useState("standard");
+
+  const seatTools = [
+    { key: "standard", label: "Standard", color: "bg-blue-100" },
+    { key: "extra", label: "Extra Legroom", color: "bg-yellow-100" },
+    { key: "business", label: "Business", color: "bg-purple-100" },
+    { key: "unavailable", label: "Unavailable", color: "bg-red-200" },
+    { key: "none", label: "No Such Seat", color: "bg-gray-200" },
+    { key: "window", label: "Window", color: "bg-cyan-100" },
+  ];
+
+  // Generate seat layout based on rows and pattern (e.g. "2-3-2")
+  const handleGenerateLayout = () => {
+    const rows = parseInt(seatRows);
+    if (!rows || !seatPattern.match(/^\d+(-\d+)*$/)) return;
+    const pattern = seatPattern.split("-").map(Number);
+    let seatLetters = [];
+    let charCode = 65; // 'A'
+    pattern.forEach((n) => {
+      for (let i = 0; i < n; i++) seatLetters.push(String.fromCharCode(charCode++));
+    });
+    const layout = [];
+    for (let r = 1; r <= rows; r++) {
+      layout.push(seatLetters.map((col) => ({
+        row: r,
+        col,
+        type: "standard"
+      })));
+    }
+    setSeatLayout(layout);
+    setForm((prev) => ({
+      ...prev,
+      seatConfig: {
+        totalRows: rows,
+        seatPattern: seatPattern,
+        seats: layout.flat()
+      }
+    }));
+  };
+
+  // Paint/assign seat type
+  const handleSeatClick = (rowIdx, colIdx) => {
+    setSeatLayout((prev) => {
+      const newLayout = prev.map((row, r) =>
+        row.map((seat, c) =>
+          r === rowIdx && c === colIdx
+            ? { ...seat, type: selectedSeatTool }
+            : seat
+        )
+      );
+      setForm((prevForm) => ({
+        ...prevForm,
+        seatConfig: {
+          ...prevForm.seatConfig,
+          seats: newLayout.flat()
+        }
+      }));
+      return newLayout;
+    });
+  };
+
+  // When going to step 4, initialize seatRows/seatPattern from form if present
+  const handleStep3Next = () => {
+    setError("");
+    setStep(4);
+    if (form.seatConfig.totalRows) setSeatRows(form.seatConfig.totalRows);
+    if (form.seatConfig.seatPattern) setSeatPattern(form.seatConfig.seatPattern);
+    if (form.seatConfig.seats?.length) {
+      // reconstruct seatLayout 2D array
+      const pattern = (form.seatConfig.seatPattern || "").split("-").map(Number);
+      let seatLetters = [];
+      let charCode = 65;
+      pattern.forEach((n) => {
+        for (let i = 0; i < n; i++) seatLetters.push(String.fromCharCode(charCode++));
+      });
+      const layout = [];
+      for (let r = 1; r <= form.seatConfig.totalRows; r++) {
+        layout.push(seatLetters.map((col) =>
+          form.seatConfig.seats.find((s) => s.row === r && s.col === col) || { row: r, col, type: "standard" }
+        ));
+      }
+      setSeatLayout(layout);
+    }
+  };
+
   const handleSubmit = async () => {
     setError("");
     try {
@@ -152,6 +247,7 @@ export default function AddAircraftForm({ onClose }) {
           fd.append(k, v ?? "");
         }
       });
+      payload.seatConfig = form.seatConfig;
       await api.post("/cms/aircraft", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -184,14 +280,18 @@ export default function AddAircraftForm({ onClose }) {
                   ? "Add New Aircraft"
                   : step === 2
                   ? "Aircraft Specs & Details"
-                  : "Assign Services"}
+                  : step === 3
+                  ? "Assign Services"
+                  : "Seat Configuration & Layout"}
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-300">
                 {step === 1
                   ? "Fill in the details below to register a new aircraft."
                   : step === 2
                   ? "Enter technical specs, amenities, and upload photos."
-                  : "Select all operational roles this aircraft is certified for."}
+                  : step === 3
+                  ? "Select all operational roles this aircraft is certified for."
+                  : "Define the seating arrangement and layout for the aircraft."}
               </p>
             </div>
           </div>
@@ -207,7 +307,16 @@ export default function AddAircraftForm({ onClose }) {
         <div className="w-full h-1 bg-slate-200 dark:bg-slate-700">
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: progressWidth }}
+            animate={{
+              width:
+                step === 1
+                  ? "25%"
+                  : step === 2
+                  ? "50%"
+                  : step === 3
+                  ? "75%"
+                  : "100%",
+            }}
             transition={{ duration: 0.8 }}
             className="h-full bg-gradient-to-r from-blue-500 to-indigo-500"
           ></motion.div>
@@ -524,8 +633,8 @@ export default function AddAircraftForm({ onClose }) {
                 </div>
               </div>
             </div>
-          ) : (
-            // Step 3: Assign Services
+          ) : step === 3 ? (
+            // ...existing step 3 UI...
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {["Air Ambulance", "Private Charter", "Pilgrimage", "Udaan Flight", "Aerial Service"].map((service) => (
                 <label
@@ -552,6 +661,104 @@ export default function AddAircraftForm({ onClose }) {
                   <span className="text-base font-medium">{service}</span>
                 </label>
               ))}
+            </div>
+          ) : (
+            // STEP 4: SEAT CONFIGURATION & LAYOUT
+            <div>
+              <div className="mb-4 flex gap-6 items-end">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Total Rows</label>
+                  <input
+                    type="number"
+                    min={1}
+                    className="border rounded px-3 py-2 w-24"
+                    value={seatRows}
+                    onChange={e => setSeatRows(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Seat Configuration</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 2-3-2"
+                    className="border rounded px-3 py-2 w-32"
+                    value={seatPattern}
+                    onChange={e => setSeatPattern(e.target.value)}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="bg-blue-600 text-white px-4 py-2 rounded font-semibold ml-2"
+                  onClick={handleGenerateLayout}
+                >
+                  Generate Layout
+                </button>
+              </div>
+              {/* Seat Tools */}
+              <div className="mb-4 flex gap-3 flex-wrap">
+                {seatTools.map(tool => (
+                  <button
+                    key={tool.key}
+                    type="button"
+                    className={`flex items-center gap-2 px-3 py-1 rounded border ${tool.color} ${selectedSeatTool === tool.key ? "ring-2 ring-blue-500" : ""}`}
+                    onClick={() => setSelectedSeatTool(tool.key)}
+                  >
+                    {tool.label}
+                  </button>
+                ))}
+              </div>
+              {/* Seat Layout Table */}
+              <div className="overflow-x-auto">
+                {seatLayout.length > 0 && (
+                  <table className="mx-auto border-separate border-spacing-2">
+                    <tbody>
+                      {seatLayout.map((row, rowIdx) => (
+                        <tr key={rowIdx}>
+                          <td className="pr-2 font-semibold text-slate-500">{rowIdx + 1}</td>
+                          {row.map((seat, colIdx) => (
+                            <td key={colIdx}>
+                              <button
+                                type="button"
+                                className={`w-9 h-9 rounded border text-xs font-bold
+                                  ${
+                                    seat.type === "standard"
+                                      ? "bg-blue-100 border-blue-300 text-blue-700"
+                                      : seat.type === "extra"
+                                      ? "bg-yellow-100 border-yellow-400 text-yellow-800"
+                                      : seat.type === "business"
+                                      ? "bg-purple-100 border-purple-400 text-purple-800"
+                                      : seat.type === "unavailable"
+                                      ? "bg-red-200 border-red-400 text-red-700"
+                                      : seat.type === "none"
+                                      ? "bg-gray-200 border-gray-400 text-gray-500"
+                                      : seat.type === "window"
+                                      ? "bg-cyan-100 border-cyan-400 text-cyan-800"
+                                      : "bg-white border-gray-300"
+                                  }
+                                `}
+                                onClick={() => handleSeatClick(rowIdx, colIdx)}
+                                title={seat.type.charAt(0).toUpperCase() + seat.type.slice(1)}
+                              >
+                                {seat.col}
+                              </button>
+                            </td>
+                          ))}
+                          <td className="pl-2 font-semibold text-slate-500">{rowIdx + 1}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td></td>
+                        {seatLayout[0]?.map((seat, idx) => (
+                          <td key={idx} className="text-xs text-slate-400">{seat.col}</td>
+                        ))}
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -593,6 +800,18 @@ export default function AddAircraftForm({ onClose }) {
           )}
 
           {step === 3 && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleStep3Next}
+              className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 
+                         text-white font-semibold shadow-md hover:shadow-lg transition"
+            >
+              Next →
+            </motion.button>
+          )}
+
+          {step === 4 && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
