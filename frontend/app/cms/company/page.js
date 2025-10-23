@@ -332,19 +332,47 @@ export default function CompanyPage() {
 		form.append("group", groupKey);
 		for (const f of Array.from(files)) form.append("files", f);
 		try {
-			const res = await api.post("/operator/upload", form, { headers: { "Content-Type": "multipart/form-data" } });
-			const returned = res.data?.files || [];
+			// Use fetch so browser sets correct multipart boundary even if axios has default headers
+			const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5100";
+			const url = `${base}/operator/upload?group=${encodeURIComponent(groupKey)}`;
+
+			// include cms token if available
+			const headers = {};
+			if (typeof window !== "undefined") {
+				const token = localStorage.getItem("cms_token");
+				if (token) headers.Authorization = `Bearer ${token}`;
+			}
+			// add fallback custom header for group
+			headers["X-Upload-Group"] = groupKey;
+
+			const resp = await fetch(url, {
+				method: "POST",
+				headers,
+				body: form,
+				credentials: "include"
+			});
+
+			if (!resp.ok) {
+				const text = await resp.text().catch(() => null);
+				console.error("uploadFiles fetch error:", resp.status, text);
+				toast.error("File upload failed", { position: "top-right" });
+				return;
+			}
+
+			const data = await resp.json();
+			const returned = data?.files || [];
+
 			// handle logo separately
 			if (groupKey === "logo" || groupKey === "companyLogo") {
 				const meta = returned[0];
 				if (meta) {
-					setCompany((p) => ({ ...p, logo: { name: meta.originalName || "", fileUrl: meta.fileUrl } }));
+					setCompany((p) => ({ ...p, logo: { name: meta.originalName || "", fileUrl: meta.fileUrl, publicId: meta.publicId } }));
 					setLogoPreview(meta.fileUrl || null);
 				}
 				return;
 			}
-			// normalize returned entries to frontend documents shape
-			const mapped = returned.map((f) => ({ name: f.originalName || f.fileUrl || "", fileUrl: f.fileUrl || "", mimeType: f.mimeType, size: f.size }));
+
+			const mapped = returned.map((f) => ({ name: f.originalName || f.fileUrl || "", fileUrl: f.fileUrl || "", mimeType: f.mimeType, size: f.size, publicId: f.publicId }));
 			setDocuments((p) => ({ ...p, [groupKey]: [...p[groupKey], ...mapped] }));
 		} catch (err) {
 			toast.error("File upload failed", { position: "top-right" });
@@ -357,6 +385,7 @@ export default function CompanyPage() {
 	// delete uploaded file (by fileUrl) and remove from state
 	const deleteUploadedDocument = async (groupKey, fileUrl) => {
 		try {
+			// backend will remove cloudinary asset using stored publicId
 			await api.delete("/operator/document", { data: { group: groupKey, fileUrl } });
 			// remove from state
 			if (groupKey === "logo" || groupKey === "companyLogo") {
@@ -423,7 +452,10 @@ export default function CompanyPage() {
 	// cleanup object URL on unmount
 	useEffect(() => {
 		return () => {
-			if (logoPreview) URL.revokeObjectURL(logoPreview);
+			// Only revoke local blob URLs created via URL.createObjectURL
+			if (logoPreview && typeof logoPreview === "string" && logoPreview.startsWith("blob:")) {
+				URL.revokeObjectURL(logoPreview);
+			}
 		};
 	}, [logoPreview]);
 
@@ -548,11 +580,13 @@ export default function CompanyPage() {
 							<div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border">
 								{logoPreview ? (
 									<img src={logoPreview} alt="logo preview" className="object-cover w-full h-full" />
-								) : company.logo && typeof company.logo === "string" ? (
-									/* if stored as URL string previously */
-									<img src={company.logo} alt="logo" className="object-cover w-full h-full" />
 								) : (
-									<span className="text-xs text-gray-500">No image</span>
+									// support company.logo stored as string (legacy) or object with fileUrl
+									(company.logo && (
+										typeof company.logo === "string"
+											? <img src={company.logo} alt="logo" className="object-cover w-full h-full" />
+											: (company.logo.fileUrl ? <img src={company.logo.fileUrl} alt="logo" className="object-cover w-full h-full" /> : <span className="text-xs text-gray-500">No image</span>)
+									)) || <span className="text-xs text-gray-500">No image</span>
 								)}
 							</div>
 

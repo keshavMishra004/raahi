@@ -1,4 +1,4 @@
-import { login, signup, getOperatorProfile, saveOperatorProfile, uploadOperatorDocuments, deleteOperatorDocument } from "../controllers/operator.controller.js";
+import { login, signup, getOperatorProfile, saveOperatorProfile, uploadOperatorDocuments, deleteOperatorDocument, testCloudinary } from "../controllers/operator.controller.js";
 import { cmsAuth } from "../middlewares/cmsAuth.js";
 
 function operatorRoutes(app) {
@@ -10,6 +10,9 @@ function operatorRoutes(app) {
     // File upload / delete endpoints
     app.post('/operator/upload', cmsAuth, uploadOperatorDocuments);
     app.delete('/operator/document', cmsAuth, deleteOperatorDocument);
+
+    // Cloudinary test (no auth) - call to validate CLOUDINARY_* env vars and connectivity
+    app.get('/operator/cloudinary/test', testCloudinary);
 }
 
 export default operatorRoutes;

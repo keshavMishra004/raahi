@@ -191,15 +191,25 @@ export async function saveOperatorProfile(req, res) {
         const update = {};
 
         if (company) {
-            update.company = {
-                ...company
-            };
-            // If logo provided as metadata name only, keep as-is; otherwise backend file uploads should populate fileUrl
-            if (company.logo && company.logo.name && !company.logo.fileUrl) {
-                update.company.logo = {
-                    originalName: company.logo.name,
-                    fileUrl: company.logo.fileUrl || ""
-                };
+            // Don't replace entire company object (would remove nested logo). Set individual company fields.
+            const { logo: logoPayload, ...companyRest } = company;
+            for (const [k, v] of Object.entries(companyRest)) {
+                update[`company.${k}`] = v;
+            }
+
+            // Only update logo metadata when payload includes a real uploaded asset (fileUrl or publicId).
+            // If frontend sends only { name: "..." } we intentionally skip updating logo to preserve existing asset.
+            if (Object.prototype.hasOwnProperty.call(company, "logo")) {
+                if (logoPayload && (logoPayload.fileUrl || logoPayload.publicId)) {
+                    update[`company.logo`] = {
+                        originalName: logoPayload.originalName || logoPayload.name || "",
+                        fileUrl: logoPayload.fileUrl || "",
+                        publicId: logoPayload.publicId || undefined,
+                        mimeType: logoPayload.mimeType || "",
+                        size: logoPayload.size || 0
+                    };
+                }
+                // explicit removal (logo: null) is not handled here — use DELETE /operator/document to remove assets.
             }
         }
 
@@ -300,12 +310,12 @@ export async function saveOperatorProfile(req, res) {
     }
 }
 
-// ---------------- New: upload / delete document controllers ----------------
+// ---------------- Updated: upload / delete document controllers ----------------
 
 // POST /operator/upload  (multipart/form-data) fields:
 // - files: file inputs (multiple)
 // - group: document group name (e.g. businessLicenses or "logo" for company logo)
-// Returns metadata for saved files.
+// Returns cloudinary metadata for saved files OR local file metadata if cloudinary is not available.
 export async function uploadOperatorDocuments(req, res) {
 	uploadMiddleware.array("files")(req, res, async function (err) {
 		if (err) {
@@ -316,29 +326,105 @@ export async function uploadOperatorDocuments(req, res) {
 			const operatorId = getOperatorIdFromReq(req) || req.body.operatorId;
 			if (!operatorId) return res.status(401).json({ message: "Unauthorized" });
 
-			const group = req.body.group;
-			if (!group) return res.status(400).json({ message: "Missing document group" });
+			// debug: show what multipart parser produced (helps diagnose missing fields)
+			console.debug("uploadOperatorDocuments - req.body keys:", Object.keys(req.body || {}));
+			console.debug("uploadOperatorDocuments - req.query:", req.query || {});
+			console.debug("uploadOperatorDocuments - req.headers['x-upload-group']:", req.headers['x-upload-group']);
+			console.debug("uploadOperatorDocuments - req.files length:", (req.files || []).length);
 
-			const files = (req.files || []).map((f) => ({
-				originalName: f.originalname,
-				fileUrl: path.posix.join("/uploads/operators", operatorId.toString(), path.basename(f.path)),
-				mimeType: f.mimetype,
-				size: f.size,
-				uploadedAt: new Date()
-			}));
+			// Accept group from multiple places to be resilient to client differences:
+			const group = (req.body && req.body.group) || req.query?.group || req.headers['x-upload-group'];
+			if (!group) {
+				console.warn("uploadOperatorDocuments: missing group. req.body keys:", Object.keys(req.body || {}));
+				return res.status(400).json({ message: "Missing document group. Include 'group' in form-data, query (?group=) or header 'X-Upload-Group'." });
+			}
 
-			// Update operator document
+			// Ensure files were parsed by multer
+			if (!req.files || req.files.length === 0) {
+				console.warn("uploadOperatorDocuments: no files received by multer. Ensure the multipart field name is 'files' and Content-Type is multipart/form-data.");
+				return res.status(400).json({ message: "No files received. Make sure request is multipart/form-data and field name is 'files'." });
+			}
+
+			// Try to dynamically load cloudinary. If unavailable, we'll fallback to local file URLs.
+			let cloudinary = null;
+			try {
+				const mod = await import("cloudinary");
+				cloudinary = mod?.v2 || null;
+				if (cloudinary) {
+					cloudinary.config({
+						cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+						api_key: process.env.CLOUDINARY_API_KEY,
+						api_secret: process.env.CLOUDINARY_API_SECRET,
+						secure: true
+					});
+				}
+			} catch (impErr) {
+				// cloudinary not installed or failed to import — proceed with local file handling
+				cloudinary = null;
+			}
+
+			const uploadedFiles = [];
+
+			for (const f of (req.files || [])) {
+				if (cloudinary) {
+					// Upload to Cloudinary and remove local temp file
+					try {
+						const folder = `operators/${operatorId}/${group}`;
+						const result = await cloudinary.uploader.upload(f.path, {
+							folder,
+							use_filename: true,
+							unique_filename: false,
+							resource_type: "auto"
+						});
+						uploadedFiles.push({
+							originalName: f.originalname,
+							fileUrl: result.secure_url,
+							publicId: result.public_id,
+							mimeType: f.mimetype,
+							size: f.size,
+							uploadedAt: new Date()
+						});
+					} catch (uploadErr) {
+						console.error("cloudinary upload error for file:", f.path, uploadErr);
+						// fall back to local metadata if cloudinary upload fails
+						const localUrl = path.posix.join("/uploads/operators", operatorId.toString(), path.basename(f.path));
+						uploadedFiles.push({
+							originalName: f.originalname,
+							fileUrl: localUrl,
+							mimeType: f.mimetype,
+							size: f.size,
+							uploadedAt: new Date()
+						});
+					} finally {
+						// cleanup local temp file if still present
+						try { if (fs.existsSync(f.path)) fs.unlinkSync(f.path); } catch (e) { /* ignore */ }
+					}
+				} else {
+					// Cloudinary not available: keep local file path (multer already saved file)
+					const localUrl = path.posix.join("/uploads/operators", operatorId.toString(), path.basename(f.path));
+					uploadedFiles.push({
+						originalName: f.originalname,
+						fileUrl: localUrl,
+						mimeType: f.mimetype,
+						size: f.size,
+						uploadedAt: new Date()
+					});
+					// Do not remove local file here; it's the persistent file location
+				}
+			}
+
 			const op = await OperatorModel.findById(operatorId);
 			if (!op) return res.status(404).json({ message: "Operator not found" });
 
-			// Special-case for logo: store metadata in company.logo
+			// Logo: save first file metadata under company.logo
 			if (group === "logo" || group === "companyLogo") {
-				// take first file only
-				const f = files[0];
+				const f = uploadedFiles[0];
+				if (!f) return res.status(400).json({ message: "No file uploaded" });
 				op.company = op.company || {};
 				op.company.logo = {
 					originalName: f.originalName,
 					fileUrl: f.fileUrl,
+					publicId: f.publicId, // may be undefined if local
 					mimeType: f.mimeType,
 					size: f.size
 				};
@@ -346,13 +432,20 @@ export async function uploadOperatorDocuments(req, res) {
 				return res.json({ message: "Uploaded", files: [op.company.logo] });
 			}
 
-			// Generic groups under documents
+			// Generic documents
 			op.documents = op.documents || {};
 			op.documents[group] = op.documents[group] || [];
-			op.documents[group].push(...files);
+			op.documents[group].push(...uploadedFiles.map(f => ({
+				originalName: f.originalName,
+				fileUrl: f.fileUrl,
+				publicId: f.publicId,
+				mimeType: f.mimeType,
+				size: f.size,
+				uploadedAt: f.uploadedAt
+			})));
 			await op.save();
 
-			return res.json({ message: "Uploaded", files });
+			return res.json({ message: "Uploaded", files: uploadedFiles });
 		} catch (e) {
 			console.error("uploadOperatorDocuments:", e);
 			return res.status(500).json({ message: "Failed to save uploaded files" });
@@ -361,7 +454,7 @@ export async function uploadOperatorDocuments(req, res) {
 }
 
 // DELETE /operator/document  (JSON) body: { group, fileUrl }
-// Deletes metadata and disk file if present.
+// Deletes metadata and Cloudinary asset (if publicId present) or local file if used.
 export async function deleteOperatorDocument(req, res) {
 	try {
 		const operatorId = getOperatorIdFromReq(req) || req.body.operatorId;
@@ -373,6 +466,23 @@ export async function deleteOperatorDocument(req, res) {
 		const op = await OperatorModel.findById(operatorId);
 		if (!op) return res.status(404).json({ message: "Operator not found" });
 
+		// Try to dynamically load cloudinary (if available)
+		let cloudinary = null;
+		try {
+			const mod = await import("cloudinary");
+			cloudinary = mod?.v2 || null;
+			if (cloudinary) {
+				cloudinary.config({
+					cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+					api_key: process.env.CLOUDINARY_API_KEY,
+					api_secret: process.env.CLOUDINARY_API_SECRET,
+					secure: true
+				});
+			}
+		} catch (impErr) {
+			cloudinary = null;
+		}
+
 		// Logo deletion
 		if (group === "logo" || group === "companyLogo") {
 			const prev = op.company?.logo;
@@ -380,13 +490,19 @@ export async function deleteOperatorDocument(req, res) {
 			op.company.logo = undefined;
 			await op.save();
 
-			// remove physical file if exists
+			// remove cloudinary asset if publicId present and cloudinary available
 			try {
-				const rel = (prev?.fileUrl || "").replace(/^\//, "");
-				const abs = path.join(process.cwd(), rel);
-				if (fs.existsSync(abs)) fs.unlinkSync(abs);
-			} catch (fsErr) {
-				console.warn("deleteOperatorDocument (logo) fs remove error", fsErr);
+				const publicId = prev?.publicId;
+				if (publicId && cloudinary) {
+					await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
+				} else {
+					// fallback: remove local file if fileUrl points to uploads folder
+					const rel = (prev?.fileUrl || "").replace(/^\//, "");
+					const abs = path.join(process.cwd(), rel);
+					if (fs.existsSync(abs)) fs.unlinkSync(abs);
+				}
+			} catch (cloudErr) {
+				console.warn("deleteOperatorDocument (logo) remove error", cloudErr);
 			}
 			return res.json({ message: "Deleted", removed: prev });
 		}
@@ -400,17 +516,68 @@ export async function deleteOperatorDocument(req, res) {
 		op.markModified(`documents.${group}`);
 		await op.save();
 
+		// remove Cloudinary asset if publicId present, otherwise remove local file
 		try {
-			const rel = (removed.fileUrl || "").replace(/^\//, "");
-			const abs = path.join(process.cwd(), rel);
-			if (fs.existsSync(abs)) fs.unlinkSync(abs);
-		} catch (fsErr) {
-			console.warn("deleteOperatorDocument fs remove error", fsErr);
+			const publicId = removed?.publicId;
+			if (publicId && cloudinary) {
+				await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
+			} else {
+				const rel = (removed.fileUrl || "").replace(/^\//, "");
+				const abs = path.join(process.cwd(), rel);
+				if (fs.existsSync(abs)) fs.unlinkSync(abs);
+			}
+		} catch (cloudErr) {
+			console.warn("deleteOperatorDocument remove error", cloudErr);
 		}
 
 		return res.json({ message: "Deleted", removed });
 	} catch (err) {
 		console.error("deleteOperatorDocument:", err);
 		return res.status(500).json({ message: "Failed to delete document" });
+	}
+}
+
+// ---------------- New: Cloudinary diagnostic endpoint ----------------
+// GET /operator/cloudinary/test
+export async function testCloudinary(req, res) {
+	try {
+		// dynamic import so server doesn't crash if package missing
+		let cloudinary = null;
+		try {
+			const mod = await import("cloudinary");
+			cloudinary = mod?.v2 || null;
+		} catch (impErr) {
+			return res.status(500).json({ ok: false, message: "cloudinary package not installed on backend", detail: String(impErr) });
+		}
+
+		if (!cloudinary) return res.status(500).json({ ok: false, message: "failed to load cloudinary module" });
+
+		// Configure with env vars
+		cloudinary.config({
+			cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+			api_key: process.env.CLOUDINARY_API_KEY,
+			api_secret: process.env.CLOUDINARY_API_SECRET,
+			secure: true
+		});
+
+		// Call admin API to list resources (small call to validate credentials)
+		try {
+			const result = await cloudinary.api.resources({ max_results: 1 });
+			return res.json({
+				ok: true,
+				message: "Cloudinary credentials are valid",
+				summary: {
+					resourcesReturned: Array.isArray(result.resources) ? result.resources.length : 0,
+					total_count: result.total_count || null
+				},
+				sampleResource: result.resources?.[0] || null
+			});
+		} catch (apiErr) {
+			console.error("Cloudinary API error:", apiErr);
+			return res.status(400).json({ ok: false, message: "Cloudinary API error", detail: apiErr?.message || String(apiErr) });
+		}
+	} catch (err) {
+		console.error("testCloudinary:", err);
+		return res.status(500).json({ ok: false, message: "Internal server error", detail: String(err) });
 	}
 }

@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const FileMeta = {
 	originalName: { type: String },
 	fileUrl: { type: String },
+	publicId: { type: String }, // Cloudinary public id
 	mimeType: { type: String },
 	size: { type: Number },
 	uploadedAt: { type: Date, default: Date.now },
@@ -14,7 +15,7 @@ const operatorSchema = new mongoose.Schema({
 	// Auth / basic
 	email: { type: String, required: true, unique: true, lowercase: true, trim: true },
 	password: { type: String, required: true },
-	operatorCode: { type: String, unique: true, sparse: true },
+	operatorCode: { type: String, unique: false},
 	name: { type: String },
 	phone: { type: String },
 
@@ -26,6 +27,7 @@ const operatorSchema = new mongoose.Schema({
 		logo: {
 			originalName: { type: String },
 			fileUrl: { type: String },
+			publicId: { type: String },
 			mimeType: { type: String },
 			size: { type: Number }
 		},
