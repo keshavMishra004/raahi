@@ -12,7 +12,7 @@ function operatorRoutes(app) {
     app.delete('/operator/document', cmsAuth, deleteOperatorDocument);
 
     // Cloudinary test (no auth) - call to validate CLOUDINARY_* env vars and connectivity
-    app.get('/operator/cloudinary/test', testCloudinary);
+    // app.get('/operator/cloudinary/test', testCloudinary);
 }
 
 export default operatorRoutes;

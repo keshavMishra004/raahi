@@ -326,22 +326,14 @@ export async function uploadOperatorDocuments(req, res) {
 			const operatorId = getOperatorIdFromReq(req) || req.body.operatorId;
 			if (!operatorId) return res.status(401).json({ message: "Unauthorized" });
 
-			// debug: show what multipart parser produced (helps diagnose missing fields)
-			console.debug("uploadOperatorDocuments - req.body keys:", Object.keys(req.body || {}));
-			console.debug("uploadOperatorDocuments - req.query:", req.query || {});
-			console.debug("uploadOperatorDocuments - req.headers['x-upload-group']:", req.headers['x-upload-group']);
-			console.debug("uploadOperatorDocuments - req.files length:", (req.files || []).length);
-
 			// Accept group from multiple places to be resilient to client differences:
 			const group = (req.body && req.body.group) || req.query?.group || req.headers['x-upload-group'];
 			if (!group) {
-				console.warn("uploadOperatorDocuments: missing group. req.body keys:", Object.keys(req.body || {}));
 				return res.status(400).json({ message: "Missing document group. Include 'group' in form-data, query (?group=) or header 'X-Upload-Group'." });
 			}
 
 			// Ensure files were parsed by multer
 			if (!req.files || req.files.length === 0) {
-				console.warn("uploadOperatorDocuments: no files received by multer. Ensure the multipart field name is 'files' and Content-Type is multipart/form-data.");
 				return res.status(400).json({ message: "No files received. Make sure request is multipart/form-data and field name is 'files'." });
 			}
 
