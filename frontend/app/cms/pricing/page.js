@@ -3,9 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import "../css/policy.css";
 import api from "../../../utils/axios";
 
-// Services (Global + 6)
+// Services (remove Global)
 const SERVICES = [
-	{ label: "Global (Default)", value: null },
 	{ label: "Fly Bharat", value: "68cfd9098270da3ebbc66e82" },
 	{ label: "Aerial Service", value: "68cfd9098270da3ebbc66e83" },
 	{ label: "Pilgrimage", value: "68cfd90a8270da3ebbc66e84" },
@@ -34,7 +33,7 @@ export default function PricingPage() {
 
 	// Service & month
 	const today = useMemo(() => new Date(), []);
-	const [selectedServiceId, setSelectedServiceId] = useState(null);
+	const [selectedServiceId, setSelectedServiceId] = useState(SERVICES[0].value);
 	const [monthView, setMonthView] = useState({
 		month: today.getMonth() + 1, // 1-12
 		year: today.getFullYear()
@@ -45,6 +44,8 @@ export default function PricingPage() {
 	const [selectedDates, setSelectedDates] = useState([]); // array of YYYY-MM-DD
 	const [calendarData, setCalendarData] = useState({});   // key: date -> record
 	const [isDragging, setIsDragging] = useState(false);
+	// Cache pricing/availability per service + month (YYYY-MM) so switching restores previous data
+	const [serviceCalendars, setServiceCalendars] = useState({}); // { "<serviceId>::YYYY-MM": { ...calendarData } }
 
 	// Form (applies to selected date(s))
 	const [form, setForm] = useState({
@@ -56,9 +57,17 @@ export default function PricingPage() {
 		customPrice: ""    // blank => unset
 	});
 
+	// Helper to build per-service, per-month cache key
+	function calKey(serviceId, mv) {
+		return `${serviceId}::${mv.year}-${String(mv.month).padStart(2, "0")}`;
+	}
+
 	// Fetch data (when month/service changes)
 	useEffect(() => {
 		if (activeTab === "calendar") {
+			// restore cached month view (if any) before any fetch
+			const key = calKey(selectedServiceId, monthView);
+			setCalendarData(serviceCalendars[key] || {});
 			loadMonth();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,35 +84,21 @@ export default function PricingPage() {
 	}
 
 	async function loadMonth() {
-		// TODO: integrate with backend endpoints once implemented.
-		// For now, keep local state (no-op fetch). Placeholder request pattern:
-		/*
 		try {
-			const params = {
-				month: monthView.month,
-				year: monthView.year,
-				serviceId: selectedServiceId === null ? "" : selectedServiceId
-			};
+			const params = { month: monthView.month, year: monthView.year, serviceId: selectedServiceId };
 			const res = await api.get("/api/pricing/calendar/month", { params });
-			mergeMonthData(res.data?.specific || [], res.data?.global || []);
+			const entries = res.data?.entries || [];
+			const map = {};
+			for (const it of entries) {
+				const key = new Date(it.date).toISOString().slice(0, 10);
+				map[key] = { ...it, source: "specific" };
+			}
+			setCalendarData(map);
+			setServiceCalendars(prev => ({ ...prev, [calKey(selectedServiceId, monthView)]: map }));
 		} catch (e) {
-			console.warn("Month fetch failed (placeholder)", e);
+			console.warn("Month fetch failed", e);
 			setCalendarData({});
 		}
-		*/
-	}
-
-	function mergeMonthData(specific, global) {
-		const map = {};
-		for (const g of global) {
-			const k = dateKey(g.date);
-			map[k] = { ...g, source: "global" };
-		}
-		for (const s of specific) {
-			const k = dateKey(s.date);
-			map[k] = { ...s, source: "specific" };
-		}
-		setCalendarData(map);
 	}
 
 	function buildMonthDays() {
@@ -120,6 +115,8 @@ export default function PricingPage() {
 
 	// ---------------- Calendar Interactions ----------------
 	function changeMonth(delta) {
+		// Persist current month data for current service before navigating
+		setServiceCalendars(prev => ({ ...prev, [calKey(selectedServiceId, monthView)]: calendarData }));
 		setMonthView(prev => {
 			let m = prev.month + delta;
 			let y = prev.year;
@@ -127,6 +124,13 @@ export default function PricingPage() {
 			if (m > 12) { m = 1; y++; }
 			return { month: m, year: y };
 		});
+		setSelectedDates([]);
+	}
+
+	// Change service and persist current data for previous service/month
+	function changeService(nextId) {
+		setServiceCalendars(prev => ({ ...prev, [calKey(selectedServiceId, monthView)]: calendarData }));
+		setSelectedServiceId(nextId);
 		setSelectedDates([]);
 	}
 
@@ -222,8 +226,27 @@ export default function PricingPage() {
 				source: selectedServiceId ? "specific" : "global"
 			};
 		}
-		setCalendarData(prev => ({ ...prev, ...updates }));
-		// TODO: Persist via POST / bulk endpoint once backend is wired.
+		// optimistic UI + cache
+		setCalendarData(prev => {
+			const next = { ...prev, ...updates };
+			setServiceCalendars(sc => ({ ...sc, [calKey(selectedServiceId, monthView)]: next }));
+			return next;
+		});
+		// persist to backend and refresh normalized data
+		const payload = {
+			serviceId: selectedServiceId,
+			entries: selectedDates.map(d => ({
+				date: d,
+				status: form.status,
+				slots: Number(form.slots),
+				booked: Number(form.booked),
+				basePrice: Math.round(Number(form.basePrice) * 100),
+				...(form.customPrice === "" ? {} : { customPrice: Math.round(Number(form.customPrice) * 100) })
+			}))
+		};
+		api.post("/api/pricing/calendar/bulk", payload)
+			.then(() => loadMonth())
+			.catch(err => console.warn("Bulk save failed", err));
 	}
 
 	// Reset selection when mode changes
@@ -485,7 +508,7 @@ export default function PricingPage() {
 			<div className="max-w-6xl mx-auto">
 				<h1 className="policy-title">Pricing Management</h1>
 				<p className="policy-desc mb-6">
-					Manage day-level pricing, blocking and availability per service with global fallback.
+					Manage day-level pricing, blocking and availability per service.
 				</p>
 				<div className="policy-tabs mb-4">
 					{PRICING_TABS.map(t => (
@@ -501,11 +524,11 @@ export default function PricingPage() {
 						<label className="block text-xs font-medium text-gray-600 mb-1">Service</label>
 						<select
 							className="border rounded px-3 py-2 w-full max-w-xs"
-							value={selectedServiceId === null ? "" : selectedServiceId}
-							onChange={e => setSelectedServiceId(e.target.value === "" ? null : e.target.value)}
+							value={selectedServiceId}
+							onChange={e => changeService(e.target.value)}
 						>
 							{SERVICES.map(s => (
-								<option key={s.label} value={s.value === null ? "" : s.value}>{s.label}</option>
+								<option key={s.value} value={s.value}>{s.label}</option>
 							))}
 						</select>
 					</div>
