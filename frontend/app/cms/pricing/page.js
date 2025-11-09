@@ -44,6 +44,7 @@ export default function PricingPage() {
 	const [mode, setMode] = useState("single");
 	const [selectedDates, setSelectedDates] = useState([]); // array of YYYY-MM-DD
 	const [calendarData, setCalendarData] = useState({});   // key: date -> record
+	const [isDragging, setIsDragging] = useState(false);
 
 	// Form (applies to selected date(s))
 	const [form, setForm] = useState({
@@ -139,6 +140,32 @@ export default function PricingPage() {
 			);
 		}
 	}
+	// Drag-select (bulk / block modes)
+	function startDragSelect(key) {
+		if (mode === "single") {
+			toggleDate(key);
+			return;
+		}
+		setIsDragging(true);
+		setSelectedDates(prev => (
+			prev.includes(key) ? prev.filter(d => d !== key) : [...prev, key]
+		));
+	}
+	function dragOverDate(key) {
+		if (!isDragging) return;
+		if (mode === "bulk" || mode === "block") {
+			setSelectedDates(prev => (prev.includes(key) ? prev : [...prev, key]));
+		}
+	}
+	function endDrag() {
+		if (isDragging) setIsDragging(false);
+	}
+	// Global mouseup to end drag even if cursor leaves grid
+	useEffect(() => {
+		const handleUp = () => setIsDragging(false);
+		window.addEventListener("mouseup", handleUp);
+		return () => window.removeEventListener("mouseup", handleUp);
+	}, []);
 
 	function handleModeChange(nextMode) {
 		setMode(nextMode);
@@ -241,7 +268,11 @@ export default function PricingPage() {
 						<div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-gray-600">
 							{DAY_LABELS.map(d => <div key={d}>{d}</div>)}
 						</div>
-						<div className="grid grid-cols-7 gap-1 text-xs">
+						<div
+							className="grid grid-cols-7 gap-1 text-xs select-none"
+							onMouseLeave={endDrag}
+							onMouseUp={endDrag}
+						>
 							{allCells.map(c => {
 								if (c.blank) return <div key={c.key} className="h-14" />;
 								const selected = selectedDates.includes(c.key);
@@ -252,9 +283,7 @@ export default function PricingPage() {
 									: (rec?.available ?? Math.max(0, (rec?.slots ?? 0) - (rec?.booked ?? 0)));
 								const priceCents = rec?.customPrice ?? rec?.basePrice;
 
-								// Compose classes so selection outline is visible even when blocked
 								const bgClasses = isBlocked ? "bg-gray-200 text-gray-600" : (selected ? "bg-blue-100" : "bg-white");
-								// Darker borders: blocked -> gray-400, normal -> gray-300, selected override with blue
 								const borderBase = isBlocked && !selected
 									? "border-gray-400"
 									: (selected ? "border-blue-500" : "border-gray-500");
@@ -265,7 +294,8 @@ export default function PricingPage() {
 									<button
 										key={c.key}
 										type="button"
-										onClick={() => toggleDate(c.key)}
+										onMouseDown={() => startDragSelect(c.key)}
+										onMouseEnter={() => dragOverDate(c.key)}
 										className={`h-14 px-1 py-1 border rounded flex flex-col items-start justify-start gap-0.5 ${bgClasses} ${borderBase} ${selectedOutline} ${hoverState}`}
 										title={c.key}
 									>
