@@ -14,7 +14,7 @@ function Sidebar() {
         <Link href='/cms/aircraft'>A/C Management</Link> {/* was empty href */}
         <Link href='#'>Services</Link> {/* was empty href */}
         <Link href='#'>Pricing</Link> {/* was empty href */}
-        <Link href='#'>Bookings</Link> {/* was empty href */}
+        <Link href='/cms/bookings'>Bookings</Link> {/* was empty href */}
         <Link href='/cms/policy'>Policy/FAQ/Reviews</Link>
         <span
           onClick={logout}

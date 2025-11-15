@@ -37,6 +37,7 @@ import Message from './models/message.model.js'; // Message model
 import policyRoute from './routes/policy.route.js';
 import faqRoutes from './routes/faq.route.js';
 import aircraftRoutes from './routes/aircraft.route.js';
+import bookingRoutes from './routes/booking.route.js';
 
 // Create app + HTTP server
 const app = express();
@@ -55,7 +56,7 @@ userRoutes(app);
 policyRoute(app);
 faqRoutes(app);
 aircraftRoutes(app);
-
+bookingRoutes(app); // <-- register booking routes so /cms/bookings exists
 
 app.use("/api/aircrafts", aircraftRoutes);
 
