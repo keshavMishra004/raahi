@@ -38,6 +38,7 @@ import policyRoute from './routes/policy.route.js';
 import faqRoutes from './routes/faq.route.js';
 import aircraftRoutes from './routes/aircraft.route.js';
 import bookingRoutes from './routes/booking.route.js';
+import pricingCalendarRoutes from "./routes/pricingCalendarRoutes.js";
 
 // Create app + HTTP server
 const app = express();
@@ -57,6 +58,8 @@ policyRoute(app);
 faqRoutes(app);
 aircraftRoutes(app);
 bookingRoutes(app); // <-- register booking routes so /cms/bookings exists
+pricingCalendarRoutes(app);
+
 
 app.use("/api/aircrafts", aircraftRoutes);
 
