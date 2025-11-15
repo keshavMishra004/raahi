@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
+import React from 'react';
 import Navbar from "./components/Nav.js";
 import Sidebar from "./components/Sidebar.js";
 import './css/layout.css'
@@ -12,14 +13,26 @@ export default function CmsLayout({ children }) {
 
   return (
     <CmsAuthProvider>
-      <div className="layout">
-        {/* Conditionally render the sidebar */}
-        {!isLoginPage && <Navbar />}
+      <div className="flex w-full min-h-screen">
+        {/* Sidebar - Hidden on mobile, visible on lg */}
+        <div className="hidden lg:block lg:w-64 lg:flex-shrink-0">
+          <Sidebar />
+        </div>
 
-        <div className="main">
-          {!isLoginPage && <Sidebar />}
+        {/* Mobile Sidebar - Overlay on small screens */}
+        <div className="lg:hidden">
+          <Sidebar />
+        </div>
 
-          <main className="mainpage">
+        {/* Main Content Area - Takes remaining space */}
+        <div className="flex-1 flex flex-col w-full min-h-screen overflow-hidden">
+          {/* Navbar - Sticky */}
+          <div className="sticky top-0 z-20 w-full flex-shrink-0">
+            <Navbar />
+          </div>
+
+          {/* Page Content - Scrollable */}
+          <main className="flex-1 overflow-y-auto w-full">
             {children}
           </main>
         </div>
