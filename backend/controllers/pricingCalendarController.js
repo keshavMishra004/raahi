@@ -113,3 +113,90 @@ export async function bulkUpdateData(req, res) {
 		return res.status(500).json({ message: "Failed to update calendar data" });
 	}
 }
+
+// GET /api/pricing/calendar/day?date=YYYY-MM-DD&serviceId=...
+export async function getDayData(req, res) {
+	try {
+		const operatorId = getOperatorIdFromReq(req);
+		if (!operatorId) return res.status(401).json({ message: "Unauthorized" });
+		const { date, serviceId } = req.query;
+		if (!date || !serviceId) return res.status(400).json({ message: "Missing date or serviceId" });
+		const d = new Date(date);
+		const utcDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+		const entry = await PricingCalendar.findOne({
+			operatorId: new mongoose.Types.ObjectId(operatorId),
+			serviceId,
+			date: utcDate
+		}).lean();
+		return res.json({ ok: true, entry });
+	} catch (err) {
+		console.error("getDayData:", err);
+		return res.status(500).json({ message: "Failed to fetch day data" });
+	}
+}
+
+// POST /api/pricing/calendar/bulk-timeslots  { serviceId, entries: [{ date, timeSlots: [{ time, status, slots, booked, basePrice, customPrice }] }] }
+export async function bulkUpdateTimeSlots(req, res) {
+	try {
+		const operatorId = getOperatorIdFromReq(req);
+		if (!operatorId) return res.status(401).json({ message: "Unauthorized" });
+		const { serviceId, entries } = req.body || {};
+		if (!serviceId) return res.status(400).json({ message: "Missing serviceId" });
+		if (!Array.isArray(entries) || entries.length === 0) return res.status(400).json({ message: "No entries provided" });
+
+		const results = [];
+		for (const item of entries) {
+			if (!item?.date) continue;
+			const d = new Date(item.date);
+			const utcDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+			let timeSlots = Array.isArray(item.timeSlots) ? item.timeSlots : [];
+
+			// if disabling timeSlots (empty array), remove field
+			let updateOps;
+			if (timeSlots.length === 0) {
+				updateOps = { $unset: { timeSlots: "" } };
+			} else {
+				const processed = timeSlots.map(ts => {
+					const slots = Number(ts.slots) || 0;
+					const booked = Number(ts.booked) || 0;
+					return {
+						time: String(ts.time).slice(0,5), // HH:MM
+						status: ts.status === "blocked" ? "blocked" : "available",
+						slots,
+						booked,
+						available: Math.max(0, slots - booked),
+						basePrice: Math.round(Number(ts.basePrice || 0)),
+						customPrice: ts.customPrice === "" || ts.customPrice == null
+							? undefined
+							: Math.round(Number(ts.customPrice))
+					};
+				});
+				updateOps = { $set: { timeSlots: processed } };
+			}
+
+			const updated = await PricingCalendar.findOneAndUpdate(
+				{
+					operatorId: new mongoose.Types.ObjectId(operatorId),
+					serviceId,
+					date: utcDate
+				},
+				{
+					...updateOps,
+					$setOnInsert: {
+						status: "available",
+						slots: 5,
+						booked: 0,
+						available: 5,
+						basePrice: 0
+					}
+				},
+				{ upsert: true, new: true, setDefaultsOnInsert: true }
+			).lean();
+			results.push(updated);
+		}
+		return res.json({ ok: true, updated: results.length, entries: results });
+	} catch (err) {
+		console.error("bulkUpdateTimeSlots:", err);
+		return res.status(500).json({ message: "Failed to update time slots" });
+	}
+}

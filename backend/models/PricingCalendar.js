@@ -1,5 +1,15 @@
 import mongoose from "mongoose";
 
+const timeSlotSchema = new mongoose.Schema({
+	time: { type: String, required: true }, // "HH:MM"
+	status: { type: String, enum: ["available", "blocked"], default: "available" },
+	slots: { type: Number, default: 0 },
+	booked: { type: Number, default: 0 },
+	available: { type: Number, default: 0 },
+	basePrice: { type: Number, default: 0 },   // cents
+	customPrice: { type: Number }              // cents
+}, { _id: false });
+
 const schema = new mongoose.Schema({
 	operatorId: { type: mongoose.Schema.Types.ObjectId, ref: "Operator", required: true },
 	serviceId: { type: String, required: true },
@@ -32,6 +42,10 @@ schema.pre("save", function (next) {
 		this.available = Math.max(0, s - b);
 	}
 	next();
+});
+
+schema.add({
+	timeSlots: [ timeSlotSchema ] // optional; absence => date-level booking only
 });
 
 const PricingCalendar = mongoose.model("PricingCalendar", schema);
