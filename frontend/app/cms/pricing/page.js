@@ -56,6 +56,12 @@ export default function PricingPage() {
 		basePrice: 0,      // major units (visual)
 		customPrice: ""    // blank => unset
 	});
+	// Multiplier for quick price adjustments (applies on Save)
+	const [multiplier, setMultiplier] = useState("1");
+	// Time slot editing state
+	const [timeSlotsEnabled, setTimeSlotsEnabled] = useState(false);
+	const [timeSlotRows, setTimeSlotRows] = useState([]); // { time, slots, booked, basePrice, customPrice, status }
+	function resetTimeSlots() { setTimeSlotRows([]); setTimeSlotsEnabled(false); }
 
 	// Helper to build per-service, per-month cache key
 	function calKey(serviceId, mv) {
@@ -192,6 +198,52 @@ export default function PricingPage() {
 			basePrice: typeof rec.basePrice === "number" ? (rec.basePrice / 100) : 0,
 			customPrice: typeof rec.customPrice === "number" ? (rec.customPrice / 100) : ""
 		});
+		// load time slots for single date (if present)
+		const timeRec = calendarData[key];
+		if (timeRec?.timeSlots && Array.isArray(timeRec.timeSlots) && mode === "single") {
+			setTimeSlotsEnabled(timeRec.timeSlots.length > 0);
+			setTimeSlotRows(timeRec.timeSlots.map(ts => ({
+				time: ts.time,
+				status: ts.status || "available",
+				slots: ts.slots ?? 0,
+				booked: ts.booked ?? 0,
+				basePrice: typeof ts.basePrice === "number" ? (ts.basePrice / 100) : 0,
+				customPrice: typeof ts.customPrice === "number" ? (ts.customPrice / 100) : ""
+			})));
+		} else {
+			resetTimeSlots();
+		}
+	}
+
+	// Time slot row helpers
+	function addTimeSlotRow() {
+		setTimeSlotsEnabled(true);
+		setTimeSlotRows(r => [...r, { time: "09:00", status: "available", slots: 5, booked: 0, basePrice: 0, customPrice: "" }]);
+	}
+	function updateTimeSlotRow(idx, field, value) {
+		setTimeSlotRows(rows => {
+			const copy = [...rows];
+			copy[idx] = { ...copy[idx], [field]: value };
+			// auto available compute when slots/booked change (visual only)
+			if (field === "slots" || field === "booked") {
+				const s = Number(copy[idx].slots);
+				const b = Number(copy[idx].booked);
+				copy[idx].available = Math.max(0, s - b);
+			}
+			return copy;
+		});
+	}
+	function removeTimeSlotRow(idx) {
+		setTimeSlotRows(rows => {
+			const copy = rows.filter((_, i) => i !== idx);
+			if (copy.length === 0) setTimeSlotsEnabled(false);
+			return copy;
+		});
+	}
+	function toggleTimeSlotsEnabled(val) {
+		setTimeSlotsEnabled(val);
+		if (!val) resetTimeSlots();
+		if (val && timeSlotRows.length === 0) addTimeSlotRow();
 	}
 
 	function handleFormChange(field, value) {
@@ -212,16 +264,38 @@ export default function PricingPage() {
 	function applyChanges() {
 		if (selectedDates.length === 0) return;
 		const updates = {};
+		const multiplierNum = Number(multiplier);
+		const useMultiplier = !Number.isNaN(multiplierNum) && multiplierNum > 0 && multiplierNum !== 1;
+
 		for (const d of selectedDates) {
 			const existing = calendarData[d] || {};
+			// Preserve existing base if not explicitly set in form to avoid wiping basePrice
+			const formBaseCents = Math.round(Number(form.basePrice) * 100);
+			const basePriceCents = Number.isFinite(formBaseCents) && formBaseCents > 0
+				? formBaseCents
+				: (typeof existing.basePrice === "number" ? existing.basePrice : 0);
+			
+			// Start from form custom (if provided), else existing custom, else fallback to base for this date
+			let customPriceCents = form.customPrice === ""
+				? (typeof existing.customPrice === "number" ? existing.customPrice : undefined)
+				: Math.round(Number(form.customPrice) * 100);
+			
+			// If multiplier is active, compute effective reference price per date and set as customPrice
+			if (useMultiplier && form.status !== "blocked") {
+				const ref = (typeof existing.customPrice === "number")
+					? existing.customPrice
+					: (typeof existing.basePrice === "number" ? existing.basePrice : basePriceCents);
+				customPriceCents = Math.round(ref * multiplierNum);
+			}
+
 			updates[d] = {
 				...existing,
 				status: form.status,
 				slots: Number(form.slots),
 				booked: Number(form.booked),
 				available: Number(form.available),
-				basePrice: Math.round(Number(form.basePrice) * 100),
-				customPrice: form.customPrice === "" ? undefined : Math.round(Number(form.customPrice) * 100),
+				basePrice: basePriceCents,
+				customPrice: customPriceCents,
 				serviceId: selectedServiceId,
 				source: selectedServiceId ? "specific" : "global"
 			};
@@ -235,18 +309,59 @@ export default function PricingPage() {
 		// persist to backend and refresh normalized data
 		const payload = {
 			serviceId: selectedServiceId,
-			entries: selectedDates.map(d => ({
-				date: d,
-				status: form.status,
-				slots: Number(form.slots),
-				booked: Number(form.booked),
-				basePrice: Math.round(Number(form.basePrice) * 100),
-				...(form.customPrice === "" ? {} : { customPrice: Math.round(Number(form.customPrice) * 100) })
-			}))
+			entries: selectedDates.map(d => {
+				const existing = calendarData[d] || {};
+				const formBaseCents = Math.round(Number(form.basePrice) * 100);
+				const basePriceCents = Number.isFinite(formBaseCents) && formBaseCents > 0
+					? formBaseCents
+					: (typeof existing.basePrice === "number" ? existing.basePrice : 0);
+				let entry = {
+					date: d,
+					status: form.status,
+					slots: Number(form.slots),
+					booked: Number(form.booked),
+					basePrice: basePriceCents
+				};
+				// customPrice: if user typed, use it; else if multiplier active, set computed value; else omit
+				if (form.customPrice !== "") {
+					entry.customPrice = Math.round(Number(form.customPrice) * 100);
+				} else if (useMultiplier) {
+					const ref = (typeof existing.customPrice === "number")
+						? existing.customPrice
+						: (typeof existing.basePrice === "number" ? existing.basePrice : basePriceCents);
+					entry.customPrice = Math.round(ref * multiplierNum);
+				}
+				return entry;
+			})
 		};
 		api.post("/api/pricing/calendar/bulk", payload)
 			.then(() => loadMonth())
 			.catch(err => console.warn("Bulk save failed", err));
+	}
+
+	async function applyTimeSlotsChanges() {
+		if (selectedDates.length === 0) return;
+		// Prepare payload; if disabled send empty array to unset
+		const payload = {
+			serviceId: selectedServiceId,
+			entries: selectedDates.map(d => ({
+				date: d,
+				timeSlots: timeSlotsEnabled ? timeSlotRows.map(r => ({
+					time: r.time,
+					status: r.status === "blocked" ? "blocked" : "available",
+					slots: Number(r.slots),
+					booked: Number(r.booked),
+					basePrice: Math.round(Number(r.basePrice) * 100),
+					customPrice: r.customPrice === "" ? undefined : Math.round(Number(r.customPrice) * 100)
+				})) : []
+			}))
+		};
+		try {
+			await api.post("/api/pricing/calendar/timeslots/bulk", payload);
+			await loadMonth();
+		} catch (err) {
+			console.warn("Time slots save failed", err);
+		}
 	}
 
 	// Reset selection when mode changes
@@ -305,6 +420,7 @@ export default function PricingPage() {
 									? 0
 									: (rec?.available ?? Math.max(0, (rec?.slots ?? 0) - (rec?.booked ?? 0)));
 								const priceCents = rec?.customPrice ?? rec?.basePrice;
+								const hasSlots = Array.isArray(rec?.timeSlots) && rec.timeSlots.length > 0;
 
 								const bgClasses = isBlocked ? "bg-gray-200 text-gray-600" : (selected ? "bg-blue-100" : "bg-white");
 								const borderBase = isBlocked && !selected
@@ -332,6 +448,9 @@ export default function PricingPage() {
 												)}
 												{!isBlocked && typeof priceCents === "number" && (
 													<span className="text-[10px]">₹ {(priceCents / 100).toFixed(2)}</span>
+												)}
+												{hasSlots && (
+													<span className="text-[9px] px-1 rounded bg-[#054972] text-white">TS</span>
 												)}
 											</>
 										)}
@@ -446,15 +565,29 @@ export default function PricingPage() {
 								</div>
 								<div>
 									<label className="text-xs font-medium text-gray-600 block">Custom Price Override (₹)</label>
-									<input
-										type="number"
-										min={0}
-										className={`mt-1 w-full border rounded px-2 py-1 ${form.status === "blocked" ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white"}`}
-										value={form.customPrice}
-										onChange={e => handleFormChange("customPrice", e.target.value)}
-										placeholder="(blank = use base)"
-										disabled={form.status === "blocked"}
-									/>
+									<div className="mt-1 flex items-center gap-2">
+										<input
+											type="number"
+											min={0}
+											className={`w-full border rounded px-2 py-1 ${form.status === "blocked" ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white"}`}
+											value={form.customPrice}
+											onChange={e => handleFormChange("customPrice", e.target.value)}
+											placeholder="(blank = use base)"
+											disabled={form.status === "blocked"}
+										/>
+										{/* Multiplier next to custom price */}
+										<input
+											type="number"
+											min={0}
+											step="0.01"
+											className={`w-24 border rounded px-2 py-1 text-xs ${form.status === "blocked" ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white"}`}
+											value={multiplier}
+											onChange={(e) => setMultiplier(e.target.value)}
+											title="Price Multiplier (e.g. 1.2 = +20%)"
+											disabled={form.status === "blocked"}
+										/>
+									</div>
+									<p className="text-[10px] text-gray-500 mt-1">Multiplier applies on Save to selected dates and stores as custom price.</p>
 								</div>
 								<div className="flex items-end">
 									<button
@@ -468,6 +601,101 @@ export default function PricingPage() {
 							<p className="text-[11px] text-gray-500 mt-2">
 								Prices stored in cents server-side. Custom price overrides base. Global fills gaps if no specific entry.
 							</p>
+						</div>
+
+						{/* Time Slots Section */}
+						<div className="mt-6 border-t pt-4">
+							<h4 className="text-sm font-semibold text-gray-700 mb-2">Time Slots</h4>
+							<label className="flex items-center gap-2 text-xs mb-2 cursor-pointer">
+								<input
+									type="checkbox"
+									checked={timeSlotsEnabled}
+									onChange={e => toggleTimeSlotsEnabled(e.target.checked)}
+								/>
+								<span>Enable time-based booking for selected date(s)</span>
+							</label>
+							{timeSlotsEnabled && (
+								<div className="space-y-3">
+									<div className="grid grid-cols-6 gap-2 text-[11px] font-medium text-gray-600">
+										<div>Time</div>
+										<div>Slots</div>
+										<div>Booked</div>
+										<div>Base ₹</div>
+										<div>Custom ₹</div>
+										<div>Status</div>
+									</div>
+									{timeSlotRows.map((r, idx) => (
+										<div key={idx} className="grid grid-cols-6 gap-2">
+											<input
+												type="time"
+												value={r.time}
+												onChange={e => updateTimeSlotRow(idx, "time", e.target.value)}
+												className="border rounded px-1 py-1 text-[11px]"
+											/>
+											<input
+												type="number"
+												min={0}
+												value={r.slots}
+												onChange={e => updateTimeSlotRow(idx, "slots", e.target.value)}
+												className="border rounded px-1 py-1 text-[11px]"
+											/>
+											<input
+												type="number"
+												min={0}
+												value={r.booked}
+												onChange={e => updateTimeSlotRow(idx, "booked", e.target.value)}
+												className="border rounded px-1 py-1 text-[11px]"
+											/>
+											<input
+												type="number"
+												min={0}
+												value={r.basePrice}
+												onChange={e => updateTimeSlotRow(idx, "basePrice", e.target.value)}
+												className="border rounded px-1 py-1 text-[11px]"
+											/>
+											<input
+												type="number"
+												min={0}
+												value={r.customPrice}
+												onChange={e => updateTimeSlotRow(idx, "customPrice", e.target.value)}
+												placeholder="(opt)"
+												className="border rounded px-1 py-1 text-[11px]"
+											/>
+											<select
+												value={r.status}
+												onChange={e => updateTimeSlotRow(idx, "status", e.target.value)}
+												className="border rounded px-1 py-1 text-[11px]"
+											>
+												<option value="available">Available</option>
+												<option value="blocked">Blocked</option>
+											</select>
+											<div className="col-span-6 text-right">
+												<button
+													type="button"
+													onClick={() => removeTimeSlotRow(idx)}
+													className="text-[10px] text-red-600"
+												>Remove</button>
+											</div>
+										</div>
+									))}
+									<div className="flex items-center justify-between">
+										<button
+											type="button"
+											onClick={addTimeSlotRow}
+											className="text-xs px-2 py-1 border rounded bg-white"
+										>Add Slot</button>
+										<button
+											type="button"
+											disabled={selectedDates.length === 0}
+											onClick={applyTimeSlotsChanges}
+											className="text-xs px-3 py-1 rounded bg-[#054972] text-white disabled:opacity-50"
+										>Save Time Slots</button>
+									</div>
+									<p className="text-[10px] text-gray-500">
+										Saving replaces time slots for all selected dates. Leave disabled to use whole-day pricing.
+									</p>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
