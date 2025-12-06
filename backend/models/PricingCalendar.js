@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 
 const timeSlotSchema = new mongoose.Schema({
-	time: { type: String, required: true }, // "HH:MM"
+	startTime: { type: String, required: true }, // "HH:MM"
+	endTime: { type: String, required: true },   // "HH:MM"
 	status: { type: String, enum: ["available", "blocked"], default: "available" },
 	slots: { type: Number, default: 0 },
 	booked: { type: Number, default: 0 },
@@ -44,9 +45,7 @@ schema.pre("save", function (next) {
 	next();
 });
 
-schema.add({
-	timeSlots: [ timeSlotSchema ] // optional; absence => date-level booking only
-});
+schema.add({ timeSlots: [ timeSlotSchema ] });
 
 const PricingCalendar = mongoose.model("PricingCalendar", schema);
 export default PricingCalendar;

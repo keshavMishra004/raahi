@@ -159,8 +159,11 @@ export async function bulkUpdateTimeSlots(req, res) {
 				const processed = timeSlots.map(ts => {
 					const slots = Number(ts.slots) || 0;
 					const booked = Number(ts.booked) || 0;
+					const st = String(ts.startTime || "").slice(0,5);
+					const et = String(ts.endTime || "").slice(0,5);
 					return {
-						time: String(ts.time).slice(0,5), // HH:MM
+						startTime: st,
+						endTime: et,
 						status: ts.status === "blocked" ? "blocked" : "available",
 						slots,
 						booked,
