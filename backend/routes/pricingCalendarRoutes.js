@@ -8,5 +8,5 @@ function pricingCalendarRoutes(app) {
 	app.post("/api/pricing/calendar/timeslots/bulk", cmsAuth, bulkUpdateTimeSlots);
 }
 
-export { pricingCalendarRoutes }; // named export
-export default pricingCalendarRoutes; // default export
+export { pricingCalendarRoutes };
+export default pricingCalendarRoutes;

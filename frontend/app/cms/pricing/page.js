@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "../css/policy.css";
 import api from "../../../utils/axios";
+import { useCmsAuth } from "@/app/context/CmsAuthContext";
 
 // Services (remove Global)
 const SERVICES = [
@@ -60,24 +61,163 @@ export default function PricingPage() {
 	const [multiplier, setMultiplier] = useState("1");
 	// Time slot editing state
 	const [timeSlotsEnabled, setTimeSlotsEnabled] = useState(false);
-	const [timeSlotRows, setTimeSlotRows] = useState([]); // { time, slots, booked, basePrice, customPrice, status }
+	const [timeSlotRows, setTimeSlotRows] = useState([]); // { startTime, endTime, slots, booked, basePrice, customPrice, status }
 	function resetTimeSlots() { setTimeSlotRows([]); setTimeSlotsEnabled(false); }
+
+	// Pricing Rules tab state
+	const [rulesServiceId, setRulesServiceId] = useState(SERVICES[0].value);
+	const [rulesStartDate, setRulesStartDate] = useState("");
+	const [rulesEndDate, setRulesEndDate] = useState("");
+	// Block 1: Base/Fixed + Cost Breakdown
+	const [rulesBasePrice, setRulesBasePrice] = useState(0);   // ₹
+	const [rulesFixedPrice, setRulesFixedPrice] = useState(0); // ₹
+	const [costBreakdowns, setCostBreakdowns] = useState([]);  // [{ name, amount }]
+	function addBreakdownRow() {
+		setCostBreakdowns(prev => [...prev, { name: "", amount: 0 }]);
+	}
+	function updateBreakdownRow(idx, field, value) {
+		setCostBreakdowns(prev => {
+			const c = [...prev];
+			c[idx] = { ...c[idx], [field]: field === "amount" ? Number(value) : value };
+			return c;
+		});
+	}
+	function removeBreakdownRow(idx) {
+		setCostBreakdowns(prev => prev.filter((_, i) => i !== idx));
+	}
+	async function saveBaseFixedPricing() {
+		try {
+			const payload = {
+				serviceId: rulesServiceId,
+				startDate: rulesStartDate,
+				endDate: rulesEndDate,
+				basePrice: Math.round(Number(rulesBasePrice) * 100),
+				fixedPrice: Math.round(Number(rulesFixedPrice) * 100),
+				costBreakdowns: costBreakdowns.map(b => ({ name: b.name, amount: Math.round(Number(b.amount) * 100) }))
+			};
+			// stub: update endpoint when backend is ready
+			await api.post("/api/pricing/rules", payload);
+		} catch (err) {
+			console.warn("Save base/fixed pricing failed", err);
+		}
+	}
+
+	// Block 2: Seasonal & Event-Based Pricing
+	const [seasonRows, setSeasonRows] = useState([]); // { name, startDate, endDate, multiplier, fixedPrice, status }
+	function addSeasonRow() {
+		setSeasonRows(prev => [...prev, { name: "", startDate: "", endDate: "", multiplier: 0, fixedPrice: 0, status: "available" }]);
+	}
+	function updateSeasonRow(idx, field, value) {
+		setSeasonRows(prev => {
+			const c = [...prev];
+			c[idx] = { ...c[idx], [field]: field === "multiplier" || field === "fixedPrice" ? Number(value) : value };
+			return c;
+		});
+	}
+	function removeSeasonRow(idx) {
+		setSeasonRows(prev => prev.filter((_, i) => i !== idx));
+	}
+	const [eventRows, setEventRows] = useState([]); // { name, startDate, endDate, multiplier, fixedPrice, status }
+	function addEventRow() {
+		setEventRows(prev => [...prev, { name: "", startDate: "", endDate: "", multiplier: 0, fixedPrice: 0, status: "available" }]);
+	}
+	function updateEventRow(idx, field, value) {
+		setEventRows(prev => {
+			const c = [...prev];
+			c[idx] = { ...c[idx], [field]: field === "multiplier" || field === "fixedPrice" ? Number(value) : value };
+			return c;
+		});
+	}
+	function removeEventRow(idx) {
+		setEventRows(prev => prev.filter((_, i) => i !== idx));
+	}
+	async function saveSeasonEventPricing() {
+		try {
+			const payload = {
+				serviceId: rulesServiceId,
+				startDate: rulesStartDate,
+				endDate: rulesEndDate,
+				seasons: seasonRows.map(r => ({
+					name: r.name,
+					startDate: r.startDate,
+					endDate: r.endDate,
+					multiplierPct: Number(r.multiplier),
+					fixedPrice: Math.round(Number(r.fixedPrice) * 100),
+					active: r.status === "available"
+				})),
+				events: eventRows.map(r => ({
+					name: r.name,
+					startDate: r.startDate,
+					endDate: r.endDate,
+					multiplierPct: Number(r.multiplier),
+					fixedPrice: Math.round(Number(r.fixedPrice) * 100),
+					active: r.status === "available"
+				}))
+			};
+			// stub: update endpoint when backend is ready
+			await api.post("/api/pricing/rules", payload);
+		} catch (err) {
+			console.warn("Save seasonal/event pricing failed", err);
+		}
+	}
+
+	// Block 3: Day-of-Week Pricing
+	const [dayPricingEnabled, setDayPricingEnabled] = useState(false);
+	const [weekdayRows, setWeekdayRows] = useState([
+		{ day: "Mon", multiplier: 0, fixedPrice: 0, status: "available" },
+		{ day: "Tue", multiplier: 0, fixedPrice: 0, status: "available" },
+		{ day: "Wed", multiplier: 0, fixedPrice: 0, status: "available" },
+		{ day: "Thu", multiplier: 0, fixedPrice: 0, status: "available" },
+		{ day: "Fri", multiplier: 0, fixedPrice: 0, status: "available" },
+		{ day: "Sat", multiplier: 0, fixedPrice: 0, status: "available" },
+		{ day: "Sun", multiplier: 0, fixedPrice: 0, status: "available" }
+	]);
+	function updateWeekdayRow(idx, field, value) {
+		setWeekdayRows(prev => {
+			const c = [...prev];
+			c[idx] = { ...c[idx], [field]: field === "multiplier" || field === "fixedPrice" ? Number(value) : value };
+			return c;
+		});
+	}
+	async function saveDayOfWeekPricing() {
+		try {
+			const payload = {
+				serviceId: rulesServiceId,
+				startDate: rulesStartDate,
+				endDate: rulesEndDate,
+				dayPricingEnabled,
+				weekdayRules: weekdayRows.map(r => ({
+					day: r.day,
+					multiplierPct: Number(r.multiplier),
+					fixedPrice: Math.round(Number(r.fixedPrice) * 100),
+					active: r.status === "available"
+				}))
+			};
+			// stub: update endpoint when backend is ready
+			await api.post("/api/pricing/rules", payload);
+		} catch (err) {
+			console.warn("Save day-of-week pricing failed", err);
+		}
+	}
 
 	// Helper to build per-service, per-month cache key
 	function calKey(serviceId, mv) {
 		return `${serviceId}::${mv.year}-${String(mv.month).padStart(2, "0")}`;
 	}
 
+	// CMS auth (ensure backend receives Authorization to return data)
+	const { token: cmsToken, loading: cmsLoading } = useCmsAuth();
+
 	// Fetch data (when month/service changes)
 	useEffect(() => {
-		if (activeTab === "calendar") {
+		if (activeTab === "calendar" && !cmsLoading && cmsToken) {
 			// restore cached month view (if any) before any fetch
 			const key = calKey(selectedServiceId, monthView);
 			setCalendarData(serviceCalendars[key] || {});
 			loadMonth();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedServiceId, monthView, activeTab]);
+	}, [selectedServiceId, monthView, activeTab, cmsToken, cmsLoading]);
 
 	// ---------------- Data Helpers ----------------
 	function dateKey(d) {
@@ -103,7 +243,9 @@ export default function PricingPage() {
 			setServiceCalendars(prev => ({ ...prev, [calKey(selectedServiceId, monthView)]: map }));
 		} catch (e) {
 			console.warn("Month fetch failed", e);
-			setCalendarData({});
+			// Keep whatever is in cache/UI; don't blank the calendar on transient error
+			const key = calKey(selectedServiceId, monthView);
+			setCalendarData(prev => Object.keys(prev).length ? prev : (serviceCalendars[key] || {}));
 		}
 	}
 
@@ -203,7 +345,8 @@ export default function PricingPage() {
 		if (timeRec?.timeSlots && Array.isArray(timeRec.timeSlots) && mode === "single") {
 			setTimeSlotsEnabled(timeRec.timeSlots.length > 0);
 			setTimeSlotRows(timeRec.timeSlots.map(ts => ({
-				time: ts.time,
+				startTime: ts.startTime || "09:00",
+				endTime: ts.endTime || "10:00",
 				status: ts.status || "available",
 				slots: ts.slots ?? 0,
 				booked: ts.booked ?? 0,
@@ -214,11 +357,10 @@ export default function PricingPage() {
 			resetTimeSlots();
 		}
 	}
-
 	// Time slot row helpers
 	function addTimeSlotRow() {
 		setTimeSlotsEnabled(true);
-		setTimeSlotRows(r => [...r, { time: "09:00", status: "available", slots: 5, booked: 0, basePrice: 0, customPrice: "" }]);
+		setTimeSlotRows(r => [...r, { startTime: "09:00", endTime: "10:00", status: "available", slots: 5, booked: 0, basePrice: 0, customPrice: "" }]);
 	}
 	function updateTimeSlotRow(idx, field, value) {
 		setTimeSlotRows(rows => {
@@ -347,7 +489,8 @@ export default function PricingPage() {
 			entries: selectedDates.map(d => ({
 				date: d,
 				timeSlots: timeSlotsEnabled ? timeSlotRows.map(r => ({
-					time: r.time,
+					startTime: r.startTime,
+					endTime: r.endTime,
 					status: r.status === "blocked" ? "blocked" : "available",
 					slots: Number(r.slots),
 					booked: Number(r.booked),
@@ -617,21 +760,17 @@ export default function PricingPage() {
 							{timeSlotsEnabled && (
 								<div className="space-y-3">
 									<div className="grid grid-cols-6 gap-2 text-[11px] font-medium text-gray-600">
-										<div>Time</div>
+										<div>Start</div>
+										<div>End</div>
 										<div>Slots</div>
 										<div>Booked</div>
 										<div>Base ₹</div>
 										<div>Custom ₹</div>
-										<div>Status</div>
 									</div>
 									{timeSlotRows.map((r, idx) => (
 										<div key={idx} className="grid grid-cols-6 gap-2">
-											<input
-												type="time"
-												value={r.time}
-												onChange={e => updateTimeSlotRow(idx, "time", e.target.value)}
-												className="border rounded px-1 py-1 text-[11px]"
-											/>
+											<input type="time" value={r.startTime} onChange={e => updateTimeSlotRow(idx, "startTime", e.target.value)} className="border rounded px-1 py-1 text-[11px]" />
+											<input type="time" value={r.endTime} onChange={e => updateTimeSlotRow(idx, "endTime", e.target.value)} className="border rounded px-1 py-1 text-[11px]" />
 											<input
 												type="number"
 												min={0}
@@ -661,11 +800,7 @@ export default function PricingPage() {
 												placeholder="(opt)"
 												className="border rounded px-1 py-1 text-[11px]"
 											/>
-											<select
-												value={r.status}
-												onChange={e => updateTimeSlotRow(idx, "status", e.target.value)}
-												className="border rounded px-1 py-1 text-[11px]"
-											>
+											<select value={r.status} onChange={e => updateTimeSlotRow(idx, "status", e.target.value)} className="col-span-6 border rounded px-1 py-1 text-[11px]">
 												<option value="available">Available</option>
 												<option value="blocked">Blocked</option>
 											</select>
@@ -707,11 +842,205 @@ export default function PricingPage() {
 		return (
 			<div className="policy-panel">
 				<div className="policy-panel-head">
-					<h3 className="text-lg font-semibold text-[#054972]">Pricing Rules (Placeholder)</h3>
+					<h3 className="text-lg font-semibold text-[#054972]">Pricing Rules</h3>
 				</div>
 				<div className="policy-panel-body space-y-4 text-sm text-gray-600">
-					<p>Define future automation (e.g. weekend multipliers, seasonal adjustments). This tab is a placeholder pending specification.</p>
-					<p>Selected Service: {selectedServiceId === null ? "Global (Default)" : selectedServiceId}</p>
+					{/* Service + Dates */}
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div>
+							<label className="text-xs font-medium text-gray-600 block">Service</label>
+							<select
+								className="mt-1 w-full border rounded px-2 py-1"
+								value={rulesServiceId}
+								onChange={e => setRulesServiceId(e.target.value)}
+							>
+								{SERVICES.map(s => (
+									<option key={s.value} value={s.value}>{s.label}</option>
+								))}
+							</select>
+						</div>
+						<div>
+							<label className="text-xs font-medium text-gray-600 block">Start Date</label>
+							<input
+								type="date"
+								className="mt-1 w-full border rounded px-2 py-1"
+								value={rulesStartDate}
+								onChange={e => setRulesStartDate(e.target.value)}
+							/>
+						</div>
+						<div>
+							<label className="text-xs font-medium text-gray-600 block">End Date</label>
+							<input
+								type="date"
+								className="mt-1 w-full border rounded px-2 py-1"
+								value={rulesEndDate}
+								onChange={e => setRulesEndDate(e.target.value)}
+							/>
+						</div>
+					</div>
+
+					{/* Block 1: Base Price / Fixed Price + Cost Breakdown */}
+					<div className="mt-4">
+						<div className="border rounded-xl shadow-sm bg-white p-4 space-y-3">
+							<h4 className="text-sm font-semibold text-gray-700">Base & Fixed Pricing</h4>
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div>
+									<label className="text-xs font-medium text-gray-600 block">Base Price (₹)</label>
+									<input type="number" min={0} value={rulesBasePrice} onChange={e => setRulesBasePrice(e.target.value)} className="mt-1 w-full border rounded px-2 py-1" />
+								</div>
+								<div>
+									<label className="text-xs font-medium text-gray-600 block">Fixed Price (₹)</label>
+									<input type="number" min={0} value={rulesFixedPrice} onChange={e => setRulesFixedPrice(e.target.value)} className="mt-1 w-full border rounded px-2 py-1" />
+								</div>
+							</div>
+							<p className="text-[11px] text-gray-500">Cost Breakdown</p>
+							<div className="space-y-2">
+								{costBreakdowns.map((b, idx) => (
+									<div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
+										<input
+											placeholder="Breakdown Name"
+											value={b.name}
+											onChange={e => updateBreakdownRow(idx, "name", e.target.value)}
+											className="border rounded px-2 py-1 text-xs"
+										/>
+										<input
+											type="number"
+											min={0}
+											placeholder="Amount (₹)"
+											value={b.amount}
+											onChange={e => updateBreakdownRow(idx, "amount", e.target.value)}
+											className="border rounded px-2 py-1 text-xs"
+										/>
+										<div className="text-right">
+											<button type="button" className="text-[10px] text-red-600" onClick={() => removeBreakdownRow(idx)}>Remove</button>
+										</div>
+									</div>
+								))}
+								<div className="flex items-center gap-2">
+									<button type="button" className="px-2 py-1 border rounded text-xs bg-white" onClick={addBreakdownRow}>Add Breakdown</button>
+									<button type="button" className="px-3 py-1 rounded bg-[#054972] text-white text-xs" onClick={saveBaseFixedPricing}>Save</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* Block 2: Seasonal Pricing */}
+					<div className="mt-6">
+						<div className="border rounded-xl shadow-sm bg-white p-4 space-y-3">
+							<h4 className="text-sm font-semibold text-gray-700">Seasonal Pricing</h4>
+							<div className="grid grid-cols-6 gap-2 text-[11px] font-medium text-gray-600">
+								<div>Season Name</div>
+								<div>Start Date</div>
+								<div>End Date</div>
+								<div>Multiplier (%)</div>
+								<div>Fixed Price (₹)</div>
+								<div>Status</div>
+							</div>
+							{seasonRows.map((r, idx) => (
+								<div key={idx} className="grid grid-cols-6 gap-2 items-center">
+									<input className="border rounded px-2 py-1 text-xs" value={r.name} onChange={e => updateSeasonRow(idx, "name", e.target.value)} />
+									<input type="date" className="border rounded px-2 py-1 text-xs" value={r.startDate} onChange={e => updateSeasonRow(idx, "startDate", e.target.value)} />
+									<input type="date" className="border rounded px-2 py-1 text-xs" value={r.endDate} onChange={e => updateSeasonRow(idx, "endDate", e.target.value)} />
+									<input type="number" className="border rounded px-2 py-1 text-xs" value={r.multiplier} onChange={e => updateSeasonRow(idx, "multiplier", e.target.value)} />
+									<input type="number" min={0} className="border rounded px-2 py-1 text-xs" value={r.fixedPrice} onChange={e => updateSeasonRow(idx, "fixedPrice", e.target.value)} />
+									<select className="border rounded px-2 py-1 text-xs" value={r.status} onChange={e => updateSeasonRow(idx, "status", e.target.value)}>
+										<option value="available">Available</option>
+										<option value="unavailable">Unavailable</option>
+									</select>
+									<div className="col-span-6 text-right">
+										<button type="button" className="text-[10px] text-red-600" onClick={() => removeSeasonRow(idx)}>Remove</button>
+									</div>
+								</div>
+							))}
+							<div className="flex items-center gap-2">
+								<button type="button" className="px-2 py-1 border rounded text-xs bg-white" onClick={addSeasonRow}>Add Season</button>
+							</div>
+							
+							<h5 className="text-xs font-semibold text-gray-700 mt-4">Event-Based Pricing</h5>
+							<div className="grid grid-cols-6 gap-2 text-[11px] font-medium text-gray-600">
+								<div>Event Name</div>
+								<div>Start Date</div>
+								<div>End Date</div>
+								<div>Multiplier (%)</div>
+								<div>Fixed Price (₹)</div>
+								<div>Status</div>
+							</div>
+							{eventRows.map((r, idx) => (
+								<div key={idx} className="grid grid-cols-6 gap-2 items-center">
+									<input className="border rounded px-2 py-1 text-xs" value={r.name} onChange={e => updateEventRow(idx, "name", e.target.value)} />
+									<input type="date" className="border rounded px-2 py-1 text-xs" value={r.startDate} onChange={e => updateEventRow(idx, "startDate", e.target.value)} />
+									<input type="date" className="border rounded px-2 py-1 text-xs" value={r.endDate} onChange={e => updateEventRow(idx, "endDate", e.target.value)} />
+									<input type="number" className="border rounded px-2 py-1 text-xs" value={r.multiplier} onChange={e => updateEventRow(idx, "multiplier", e.target.value)} />
+									<input type="number" min={0} className="border rounded px-2 py-1 text-xs" value={r.fixedPrice} onChange={e => updateEventRow(idx, "fixedPrice", e.target.value)} />
+									<select className="border rounded px-2 py-1 text-xs" value={r.status} onChange={e => updateEventRow(idx, "status", e.target.value)}>
+										<option value="available">Available</option>
+										<option value="unavailable">Unavailable</option>
+									</select>
+									<div className="col-span-6 text-right">
+										<button type="button" className="text-[10px] text-red-600" onClick={() => removeEventRow(idx)}>Remove</button>
+									</div>
+								</div>
+							))}
+							<div className="flex items-center justify-between">
+								<button type="button" className="px-2 py-1 border rounded text-xs bg-white" onClick={addEventRow}>Add Event</button>
+								<button type="button" className="px-3 py-1 rounded bg-[#054972] text-white text-xs" onClick={saveSeasonEventPricing}>Save All Changes</button>
+							</div>
+						</div>
+					</div>
+
+					{/* Block 3: Day-of-Week Pricing */}
+					<div className="mt-6">
+						<div className="border rounded-xl shadow-sm bg-white p-4 space-y-3">
+							<h4 className="text-sm font-semibold text-gray-700">Day of Week Pricing</h4>
+							<label className="flex items-center gap-2 text-xs">
+								<input type="checkbox" checked={dayPricingEnabled} onChange={e => setDayPricingEnabled(e.target.checked)} />
+								<span>Enable day based pricing</span>
+							</label>
+							{dayPricingEnabled && (
+								<>
+									<div className="grid grid-cols-4 md:grid-cols-6 gap-2 text-[11px] font-medium text-gray-600">
+										<div>Day</div>
+										<div>Multiplier (%)</div>
+										<div>Fixed Price (₹)</div>
+										<div className="md:col-span-2">Status</div>
+									</div>
+									{weekdayRows.map((r, idx) => (
+										<div key={r.day} className="grid grid-cols-4 md:grid-cols-6 gap-2 items-center">
+											<div className="text-xs">{r.day}</div>
+											<input
+												type="number"
+												className="border rounded px-2 py-1 text-xs"
+												value={r.multiplier}
+												onChange={e => updateWeekdayRow(idx, "multiplier", e.target.value)}
+											/>
+											<input
+												type="number"
+												min={0}
+												className="border rounded px-2 py-1 text-xs"
+												value={r.fixedPrice}
+												onChange={e => updateWeekdayRow(idx, "fixedPrice", e.target.value)}
+											/>
+											<select
+												className="border rounded px-2 py-1 text-xs md:col-span-2"
+												value={r.status}
+												onChange={e => updateWeekdayRow(idx, "status", e.target.value)}
+											>
+												<option value="available">Available</option>
+												<option value="unavailable">Unavailable</option>
+											</select>
+										</div>
+									))}
+									<div className="flex items-center justify-end">
+										<button type="button" className="px-3 py-1 rounded bg-[#054972] text-white text-xs" onClick={saveDayOfWeekPricing}>
+											Save Day Pricing
+										</button>
+									</div>
+								</>
+							)}
+						</div>
+					</div>
+
+					<p className="text-[11px] text-gray-500">Select service and date range to apply pricing rules.</p>
 				</div>
 			</div>
 		);
