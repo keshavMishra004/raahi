@@ -1,7 +1,2 @@
-.sidebar {
-    display: flex;
-    flex-direction: column;
-    width: max-content;
-    background-color: white;
-    height: 100vh;
-}
+/* Sidebar styles now handled by Tailwind CSS in Sidebar.js */
+/* This file can be kept empty or removed entirely */

@@ -1,0 +1,193 @@
+/* /* ============================================
+   BOOKING PAGE CUSTOM STYLES
+   Extended Premium Styles for Bookings Management
+   ============================================ */
+
+/* .bookings-page {
+  background: linear-gradient(135deg, #F8FAFC 0%, #E0F2FE 100%);
+  min-height: 100vh;
+  padding: var(--space-6);
+}
+
+.bookings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  background: var(--color-white);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.bookings-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.bookings-title-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-sky-blue), var(--color-accent-blue));
+  border-radius: var(--radius-lg);
+  color: var(--color-white);
+  font-size: 24px;
+}
+
+.bookings-filters {
+  background: var(--color-white);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-6);
+  border-left: 4px solid var(--color-sky-blue);
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+.booking-row-expanded {
+  background: linear-gradient(90deg, rgba(30, 144, 255, 0.03), rgba(0, 168, 232, 0.03));
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-sky-blue);
+}
+
+.booking-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+.booking-detail-section {
+  padding: var(--space-4);
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-grey-200);
+}
+
+.booking-detail-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-grey-500);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+}
+
+.booking-detail-value {
+  font-size: var(--font-size-lg);
+  color: var(--color-dark-blue);
+  font-weight: var(--font-weight-semibold);
+  word-break: break-word;
+}
+
+.pagination-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  border-top: 1px solid var(--color-grey-200);
+}
+
+.pagination-info {
+  font-size: var(--font-size-sm);
+  color: var(--color-grey-600);
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.pagination-btn {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-grey-300);
+  background: var(--color-white);
+  color: var(--color-dark-blue);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+  font-size: var(--font-size-sm);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--color-sky-blue);
+  color: var(--color-white);
+  border-color: var(--color-sky-blue);
+}
+
+.pagination-btn.active {
+  background: var(--color-sky-blue);
+  color: var(--color-white);
+  border-color: var(--color-sky-blue);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+/* @media (max-width: 768px) {
+  .bookings-page {
+    padding: var(--space-4);
+  }
+
+  .bookings-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .filter-actions .btn {
+    width: 100%;
+  }
+
+  .booking-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination-section {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .pagination-buttons {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}  */
