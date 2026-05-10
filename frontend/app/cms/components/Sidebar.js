@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { useCmsAuth } from "@/app/context/CmsAuthContext"
-import { LayoutDashboard, Briefcase, Plane, Settings, BookOpen, Calendar, FileText, LogOut, Menu, X, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Briefcase, Plane, Settings, BookOpen, Calendar, FileText, LogOut, Menu, X, ChevronRight, User } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 
 function Sidebar() {
@@ -16,6 +16,7 @@ function Sidebar() {
   };
 
   const navItems = [
+    { href: '/cms/profile', label: 'Profile', icon: User },
     { href: '/cms', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/cms/company', label: 'Company Info', icon: Briefcase },
     { href: '/cms/aircraft', label: 'Aircraft Management', icon: Plane },

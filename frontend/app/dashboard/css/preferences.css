@@ -1,0 +1,709 @@
+/* =============================================
+   PREFERENCES PAGE - MODERN DESIGN
+   ============================================= */
+
+.preferences-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 1rem;
+}
+
+.preferences-header {
+  max-width: 850px;
+  margin: 0 auto 2.5rem;
+}
+
+.preferences-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.preferences-header p {
+  font-size: 1.05rem;
+  color: #6b7280;
+}
+
+/* ============================================
+   PREFERENCE CARDS - MODERN
+   ============================================= */
+
+.preference-card {
+  max-width: 850px;
+  margin: 0 auto 1.75rem;
+  background: white;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.preference-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  border-color: #667eea;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  color: white;
+}
+
+.card-header h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.card-content {
+  padding: 2.25rem;
+}
+
+/* ============================================
+   PREFERENCE GROUPS
+   ============================================= */
+
+.preference-group {
+  margin-bottom: 2.5rem;
+}
+
+.preference-group:last-child {
+  margin-bottom: 0;
+}
+
+.preference-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================
+   AIRLINE OPTIONS
+   ============================================= */
+
+.airline-input-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.airline-input {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.6rem;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.airline-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.btn-add-airline {
+  padding: 0.875rem 1.75rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 0.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  font-size: 0.95rem;
+}
+
+.btn-add-airline:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.airline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.airline-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #e0e7ff, #f0ebff);
+  color: #4f46e5;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid #c7d2fe;
+}
+
+/* ============================================
+   SEAT/MEAL OPTIONS
+   ============================================= */
+
+.seat-options,
+.meal-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.seat-option,
+.meal-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  font-weight: 600;
+}
+
+.seat-option:hover,
+.meal-option:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.seat-option input[type='radio'],
+.meal-option input[type='radio'] {
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.seat-option input[type='radio']:checked + span,
+.meal-option input[type='radio']:checked + span {
+  color: #667eea;
+  font-weight: 700;
+}
+
+/* ============================================
+   NOTIFICATION ITEMS
+   ============================================= */
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-label {
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.3rem 0;
+  font-size: 0.95rem;
+}
+
+.notification-desc {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* ============================================
+   TOGGLE SWITCH - MODERN
+   ============================================= */
+
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  width: 56px;
+  height: 32px;
+  margin-left: 1rem;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: all 0.3s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 26px;
+  width: 26px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: all 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input:checked + .slider {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================= */
+
+.preference-actions {
+  max-width: 850px;
+  margin: 2.5rem auto 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-save {
+  padding: 1rem 2.25rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0.6rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-save:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================= */
+
+@media (max-width: 768px) {
+  .preferences-page {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .preferences-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .card-header {
+    padding: 1.25rem;
+  }
+
+  .card-content {
+    padding: 1.5rem;
+  }
+
+  .preference-group {
+    margin-bottom: 1.75rem;
+  }
+
+  .seat-options,
+  .meal-options {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .preference-actions {
+    flex-direction: column;
+  }
+
+  .btn-save {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .preferences-header h1 {
+    font-size: 1.35rem;
+  }
+
+  .card-header {
+    padding: 1rem;
+  }
+
+  .card-content {
+    padding: 1.25rem;
+  }
+
+  .airline-input-group {
+    flex-direction: column;
+  }
+
+  .btn-add-airline {
+    width: 100%;
+  }
+
+  .seat-options,
+  .meal-options {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .toggle-switch {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+}
+
+.preference-group {
+  margin-bottom: 2rem;
+}
+
+.preference-group:last-child {
+  margin-bottom: 0;
+}
+
+.preference-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+/* ============================================
+   AIRLINE INPUT
+   ============================================= */
+
+.airline-input-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.airline-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.airline-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-add-airline {
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add-airline:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* ============================================
+   AIRLINE TAGS
+   ============================================= */
+
+.airline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.airline-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #e0e7ff;
+  color: #4f46e5;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ============================================
+   SEAT OPTIONS
+   ============================================= */
+
+.seat-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.seat-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.seat-option input[type='radio'] {
+  cursor: pointer;
+}
+
+.seat-option:hover {
+  border-color: #667eea;
+  background: #f3f4f6;
+}
+
+.seat-option input[type='radio']:checked + span {
+  font-weight: 600;
+  color: #667eea;
+}
+
+/* ============================================
+   MEAL OPTIONS
+   ============================================= */
+
+.meal-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+.meal-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.8rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.meal-option input[type='radio'] {
+  cursor: pointer;
+}
+
+.meal-option:hover {
+  border-color: #667eea;
+  background: #fafafa;
+}
+
+.meal-option input[type='radio']:checked {
+  accent-color: #667eea;
+}
+
+.meal-option input[type='radio']:checked + span {
+  font-weight: 700;
+  color: #667eea;
+}
+
+/* ============================================
+   NOTIFICATION ITEMS
+   ============================================= */
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-label {
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.25rem 0;
+}
+
+.notification-desc {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* ============================================
+   TOGGLE SWITCH
+   ============================================= */
+
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  width: 50px;
+  height: 28px;
+  margin-left: 1rem;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: all 0.3s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: all 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #10b981;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================= */
+
+.preference-actions {
+  max-width: 800px;
+  margin: 2rem auto 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-save {
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+}
+
+.btn-save:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================= */
+
+@media (max-width: 640px) {
+  .preferences-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .preferences-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .card-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .seat-options,
+  .meal-options {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  }
+
+  .notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .toggle-switch {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+
+  .preference-actions {
+    justify-content: stretch;
+  }
+
+  .btn-save {
+    width: 100%;
+  }
+}

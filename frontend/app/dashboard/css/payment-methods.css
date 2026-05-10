@@ -1,0 +1,515 @@
+/* =============================================
+   PAYMENT METHODS PAGE - MODERN DESIGN
+   ============================================= */
+
+:root {
+  --primary: #667eea;
+  --primary-dark: #764ba2;
+  --success: #43e97b;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-methods-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 1rem;
+}
+
+.payment-header {
+  max-width: 950px;
+  margin: 0 auto 2.5rem;
+}
+
+.payment-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.payment-header p {
+  font-size: 1.05rem;
+  color: #6b7280;
+}
+
+/* ============================================
+   PAYMENT CARD SECTIONS - MODERN
+   ============================================= */
+
+.payment-card-section {
+  max-width: 950px;
+  margin: 0 auto 2rem;
+  background: white;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid #e5e7eb;
+  transition: var(--transition);
+}
+
+.payment-card-section:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: #667eea;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.section-header h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.btn-add-method {
+  padding: 0.75rem 1.75rem;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 0.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 0.95rem;
+}
+
+.btn-add-method:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   ADD CARD FORM - MODERN
+   ============================================= */
+
+.add-card-form,
+.add-upi-form {
+  padding: 2.25rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.625rem;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4b5563;
+}
+
+.form-input,
+.form-group select {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.6rem;
+  font-size: 0.95rem;
+  transition: var(--transition);
+  background: white;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.btn-submit {
+  padding: 1rem 2.25rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 0.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* ============================================
+   PAYMENT METHODS LIST - MODERN
+   ============================================= */
+
+.payment-methods-list {
+  padding: 1.75rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.payment-method-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.75rem;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f5f0ff 100%);
+  border: 2px solid #e5d4ff;
+  border-radius: 1rem;
+  transition: var(--transition);
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.payment-method-card:hover {
+  border-color: #667eea;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.payment-method-card:hover {
+  border-color: #667eea;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   CARD VISUAL - PREMIUM DESIGN
+   ============================================= */
+
+.card-visual {
+  flex: 1;
+  min-width: 280px;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 1rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.card-visual::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.card-chip {
+  width: 56px;
+  height: 44px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.card-number {
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  margin-bottom: 1.5rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  word-spacing: 0.5rem;
+}
+
+.card-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 0.9rem;
+}
+
+.cardholder {
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.expiry {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+/* ============================================
+   UPI TYPE - MODERN
+   ============================================= */
+
+.upi-info {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.upi-icon {
+  font-size: 2.75rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.upi-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.upi-id {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.upi-name {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+/* ============================================
+   METHOD ACTIONS - MODERN
+   ============================================= */
+
+.method-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn-action {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-default {
+  background: linear-gradient(135deg, #e0e7ff, #f0ebff);
+  color: #4f46e5;
+  border: 2px solid #c7d2fe;
+}
+
+.btn-default:hover {
+  background: linear-gradient(135deg, #c7d2fe, #e0d7ff);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.btn-delete {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 2px solid #fecaca;
+}
+
+.btn-delete:hover {
+  background: #fecaca;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+.badge-default {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #059669;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid #6ee7b7;
+}
+
+/* ============================================
+   EMPTY STATE - MODERN
+   ============================================= */
+
+.empty-state {
+  max-width: 950px;
+  margin: 4rem auto;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid #e5e7eb;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+  color: #9ca3af;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* ============================================
+   RESPONSIVE - MODERN
+   ============================================= */
+
+@media (max-width: 768px) {
+  .payment-methods-page {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .payment-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .btn-add-method {
+    align-self: flex-end;
+    width: auto;
+  }
+
+  .add-card-form,
+  .add-upi-form {
+    padding: 1.5rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .payment-method-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+
+  .card-visual {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .method-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .btn-action {
+    flex: 1;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .payment-methods-list {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-header h1 {
+    font-size: 1.35rem;
+  }
+
+  .section-header {
+    padding: 1rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .card-visual {
+    padding: 1.5rem;
+  }
+
+  .card-number {
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+  }
+
+  .card-details {
+    font-size: 0.8rem;
+  }
+
+  .method-actions {
+    flex-direction: column;
+  }
+
+  .btn-action {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  .empty-state {
+    padding: 2rem 1.5rem;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+  }
+}
