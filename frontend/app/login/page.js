@@ -3,12 +3,14 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import userApi from "../../utils/userAxios";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,17 +32,58 @@ export default function LoginPage() {
         email: form.email,
         password: form.password,
       });
-      // Save token to localStorage
-      localStorage.setItem("user_token", res.data.token);
-      // Redirect to home/dashboard
-      window.location.href = "/";
+
+      // Robust token extraction
+      const token =
+        res?.data?.token ||
+        res?.data?.accessToken ||
+        res?.data?.data?.token ||
+        null;
+
+      if (!token) {
+        throw new Error("No token returned from server");
+      }
+
+      // Persist token (localStorage + cookie)
+      try {
+        localStorage.setItem("token", token);
+      } catch (e) {
+        // ignore storage errors
+      }
+      try {
+        document.cookie = `token=${token}; path=/; max-age=${604800}`; // 7 days
+      } catch (e) {
+        // ignore cookie errors
+      }
+
+      // Ensure userApi attaches Authorization header for subsequent requests
+      try {
+        userApi.defaults = userApi.defaults || {};
+        userApi.defaults.headers = userApi.defaults.headers || {};
+        userApi.defaults.headers.common = {
+          ...(userApi.defaults.headers.common || {}),
+          Authorization: `Bearer ${token}`,
+        };
+      } catch (e) {
+        // ignore
+      }
+
+      // Navigate to dashboard — force full reload to ensure ProtectedRoute validates using stored token
+      router.replace("/dashboard");
+      // fallback to hard navigation if SPA routing doesn't take effect
+      setTimeout(() => {
+        if (typeof window !== "undefined" && window.location.pathname !== "/dashboard") {
+          window.location.assign("/dashboard");
+        }
+      }, 200);
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
+        err?.message ||
         "Login failed. Please try again.";
       setError(msg);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

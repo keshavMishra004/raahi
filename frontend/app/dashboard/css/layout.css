@@ -1,0 +1,169 @@
+/* =============================================
+   DASHBOARD LAYOUT - OPTIMIZED
+   ============================================= */
+
+:root {
+  --primary: #667eea;
+  --primary-dark: #764ba2;
+  --sidebar-width: 280px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-layout {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow-x: hidden;
+}
+
+.layout-wrapper {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  gap: 1.5rem;
+  min-height: 100vh;
+  padding: 1.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   SIDEBAR CONTAINER
+   ============================================= */
+
+.sidebar-container {
+  display: flex;
+}
+
+.sidebar-sticky {
+  position: sticky;
+  top: 1.5rem;
+  width: 100%;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+
+.sidebar-sticky::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-sticky::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-sticky::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c7d2fe 0%, #d8ccf9 100%);
+  border-radius: 3px;
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================= */
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-right: 0.5rem;
+}
+
+.main-content > * {
+  width: 100%;
+}
+
+/* ============================================
+   RESPONSIVE - TABLET
+   ============================================= */
+
+@media (max-width: 1024px) {
+  .layout-wrapper {
+    grid-template-columns: 260px 1fr;
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+
+  .sidebar-container {
+    display: none;
+  }
+
+  .sidebar-sticky {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    width: 260px;
+    background: white;
+    z-index: 100;
+    border-radius: 1rem;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    max-height: calc(100vh - 2rem);
+  }
+
+  .sidebar-sticky.active {
+    display: block;
+  }
+
+  .sidebar-toggle {
+    display: flex;
+  }
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================= */
+
+@media (max-width: 768px) {
+  .dashboard-layout {
+    background: #f5f7fa;
+  }
+
+  .layout-wrapper {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem 0.75rem;
+  }
+
+  .sidebar-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+
+  .sidebar-container.active {
+    display: block;
+  }
+
+  .sidebar-sticky {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    max-height: 100%;
+    border-radius: 0;
+    overflow-y: auto;
+    z-index: 41;
+  }
+
+  .main-content {
+    gap: 1rem;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-wrapper {
+    padding: 0.75rem;
+  }
+
+  .sidebar-sticky {
+    width: 240px;
+  }
+
+  .main-content {
+    gap: 0.75rem;
+  }
+}

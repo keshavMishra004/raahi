@@ -108,6 +108,15 @@ io.on('connection', (socket) => {
   });
 });
 
+// improved error handler: return message and stack in development to aid debugging
+app.use((err, req, res, next) => {
+  console.error(err);
+  const status = err.status || 500;
+  const payload = { message: err.message || 'Server error' };
+  if (process.env.NODE_ENV === 'development') payload.stack = err.stack;
+  res.status(status).json(payload);
+});
+
 // Start server
 const PORT = process.env.PORT || 5100;
 httpServer.listen(PORT, () => {
